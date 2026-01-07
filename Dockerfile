@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM eclipse-temurin:25-jre
+FROM eclipse-temurin:25.0.1_8-jre
 
 # Multi-arch support
 ARG TARGETOS
@@ -38,7 +38,7 @@ RUN --mount=target=/build,source=build \
     sh /build/run.sh install-packages
 
 # 2. Add Gosu (Privilege dropping)
-COPY --from=tianon/gosu /gosu /usr/local/bin/
+COPY --from=tianon/gosu:1.19 /gosu /usr/local/bin/
 RUN chmod +x /usr/local/bin/gosu
 
 # 3. Setup User (Cached Layer)

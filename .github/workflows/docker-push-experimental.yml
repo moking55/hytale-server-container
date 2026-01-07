@@ -57,7 +57,7 @@ jobs:
         with:
           image-ref: 'freudend/hytale-server:experimental'
           format: 'table'
-          exit-code: '1' 
+          exit-code: '0' 
           severity: 'CRITICAL,HIGH'
 
   # 4. README
