@@ -74,5 +74,5 @@ jobs:
           # Using consistent secret names here:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-          repository: freudend/hytale-server
+          repository: freudend/hytale-server:experimental
           readme-filepath: ./README.md
