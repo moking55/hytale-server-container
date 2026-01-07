@@ -40,7 +40,20 @@ else
     log "Environment: Port $SERVER_PORT is available for binding." "$GREEN"
 fi
 
-# 5. QUIC / UDP Kernel Capability Check
+# 3. UDP "Liveness" Test
+# Since QUIC is encrypted, we can't easily simulate a full handshake with raw sh.
+# However, we can check if the socket is "reachable" locally.
+# We use /dev/udp (if available) or a simple timeout check.
+
+log "Testing UDP socket responsiveness..."
+if (echo > /dev/udp/127.0.0.1/"$SERVER_PORT") 2>/dev/null; then
+    log "QUIC: Local UDP loopback is reachable." "$GREEN"
+else
+    # Fallback if /dev/udp is disabled in the shell
+    log "Warning: Shell /dev/udp redirection not supported. Skipping raw packet test." "$YELLOW"
+fi
+
+# 4. QUIC / UDP Kernel Capability Check
 # QUIC requires large UDP buffers to avoid packet loss
 RMEM_PATH="/proc/sys/net/core/rmem_max"
 WMEM_PATH="/proc/sys/net/core/wmem_max"
@@ -58,7 +71,7 @@ else
     log "Warning: Cannot read UDP buffer limits. Kernel access restricted." "$YELLOW"
 fi
 
-# 3. DNS / Connectivity Check
+# 5. DNS / Connectivity Check
 # Check if the container can actually reach the internet (for Auth/Updates)
 if curl -s --connect-timeout 5 https://google.com > /dev/null; then
     log "Connectivity: Internet access verified." "$GREEN"
@@ -72,7 +85,7 @@ else
     log "Warning: No internet access detected. Authentication may fail." "$YELLOW"
 fi
 
-# 4. SERVER_IP Syntax Validation (sh compatible)
+# 6. SERVER_IP Syntax Validation (sh compatible)
 is_valid_ipv4() {
     echo "$1" | grep -Eq '^([0-9]{1,3}\.){3}[0-9]{1,3}$' || return 1
 }
