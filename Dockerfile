@@ -35,7 +35,7 @@ ARG FORCE_INSTALL_PACKAGES=1
 # We install dos2unix and iproute2 here so they are ready for later steps
 RUN --mount=target=/build,source=build \
     TARGET=${TARGETARCH}${TARGETVARIANT} \
-    /build/run.sh install-packages
+    sh /build/run.sh install-packages
 
 # 2. Add Gosu (Privilege dropping)
 COPY --from=tianon/gosu /gosu /usr/local/bin/
@@ -43,7 +43,7 @@ RUN chmod +x /usr/local/bin/gosu
 
 # 3. Setup User (Cached Layer)
 RUN --mount=target=/build,source=build \
-    /build/run.sh setup-user
+    sh /build/run.sh setup-user
 
 # 4. bake the jar. We download this to /usr/local/lib/ so it's protected and separate from scripts
 ARG SERVER_JAR_URL
