@@ -35,7 +35,7 @@ if [ "$MINECRAFT" = "TRUE" ]; then
 fi
 
 # 1. Config & EULA
-sh "$SCRIPTS_PATH/checks/server-properties.sh"
+sh "$SCRIPTS_PATH/hytale/server-properties.sh"
 sh "$SCRIPTS_PATH/hytale/eula.sh"
 
 # 2. Audits
