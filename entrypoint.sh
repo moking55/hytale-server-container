@@ -1,58 +1,42 @@
 #!/bin/sh
 set -eu
 
-# ==============================================================================
-# This is the 
-# ==============================================================================
+# Source Central Utilities
+. "/usr/local/bin/scripts/utils.sh"
 
+# Variable declaration
 PROPERTIES_FILE="${HOME}/server.properties"
+JAR_PATH="/usr/local/lib/hytale-server.jar"
+SCRIPTS_PATH="/usr/local/bin/scripts"
 
-# Colors
-CYAN="\033[0;36m"
-GREEN="\033[0;32m"
-RED="\033[0;31m"
-RESET="\033[0m"
-
-log() { echo "${3:-$RESET}[start-hytale] $2${RESET}"; }
-
-log "[init]" "Starting Hytale container for user: $USER" "$CYAN"
-
-# 1. EULA Check (Redirected to $HOME)
-case "$EULA" in
-    [Tt][Rr][Uu][Ee])
-        log "[init]" "Accepting EULA..." "$GREEN"
-        echo "eula=true" > "${HOME}/eula.txt"
-        ;;
-    *)
-        if [ ! -f "${HOME}/eula.txt" ] || ! grep -q "eula=true" "${HOME}/eula.txt"; then
-            log "[error]" "EULA=true environment variable required." "$RED"
-            exit 1
-        fi
-        ;;
-esac
-
-# 2. Configure server.properties (Using $HOME)
-if [ ! -f "$PROPERTIES_FILE" ]; then
-    log "[init]" "Creating server.properties..." "$CYAN"
-    printf "server-ip=%s\nserver-port=%s\nquery.port=%s\n" "$SERVER_IP" "$SERVER_PORT" "$SERVER_PORT" > "$PROPERTIES_FILE"
+# 1. First-time Download / Auto-Update
+# Do this FIRST so scripts have a JAR to inspect if needed
+if [ ! -f "$JAR_PATH" ]; then
+    log "Hytale JAR missing. Downloading..." "$YELLOW" "setup"
+    sh "$SCRIPTS_PATH/hytale/download-server-binary.sh"
 else
-    log "[init]" "Syncing server.properties (Port: $SERVER_PORT)..." "$CYAN"
-    sed -i "s/^server-ip=.*/server-ip=$SERVER_IP/" "$PROPERTIES_FILE"
-    sed -i "s/^server-port=.*/server-port=$SERVER_PORT/" "$PROPERTIES_FILE"
+    # Auto-update logic (checks if a new version is available)
+    sh "$SCRIPTS_PATH/hytale/auto-update.sh"
 fi
 
-# 3. Audits
-/usr/local/bin/network.sh
-/usr/local/bin/security.sh
+# 2. Environment Checks & EULA
+# These ensure the user has accepted terms and config is valid
+sh "$SCRIPTS_PATH/hytale/eula.sh"
+sh "$SCRIPTS_PATH/checks/server-properties.sh"
 
-# 4. Auto download hytale server binary or auto update the server binary when there is no binary located.
-/usr/local/bin/download-server-binary.sh
+# 3. Audits
+# Performance and security checks
+sh "$SCRIPTS_PATH/checks/network.sh"
+sh "$SCRIPTS_PATH/checks/security.sh"
 
 # 4. Pterodactyl Variable Parsing
 # Converts {{SERVER_MEMORY}} etc. into usable bash values
-MODIFIED_STARTUP=$(eval echo $(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g'))
+MODIFIED_STARTUP=$(eval echo $(echo "${STARTUP}" | sed -e 's/{{/${/g' -e 's/}}/}/g'))
 
 # 5. Execution
-# We use 'exec' so Java receives the shutdown signals from Pterodactyl
-log "[status]" "Running: $MODIFIED_STARTUP" "$GREEN"
+# Corrected log order: log "message" "color" "prefix"
+log "Running: $MODIFIED_STARTUP" "$GREEN" "status"
+
+# 'exec' ensures Java gets PID 1 to handle SIGTERM (graceful shutdown) correctly
+
 exec ${MODIFIED_STARTUP}
