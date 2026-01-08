@@ -67,13 +67,11 @@ WORKDIR ${HOME}
 # 6. copy over the scripts and the etnrypoint.sh file
 COPY scripts/ /usr/local/bin/scripts
 COPY entrypoint.sh /entrypoint.sh
-COPY scripts/hytale/server-binary.sh /usr/local/bin
 
 # 7. Perform all file operations in one RUN to minimize layers
 RUN find /usr/local/bin/scripts -type f -name "*.sh" -exec dos2unix {} + && \
     dos2unix /entrypoint.sh && \
     chmod -R 755 /usr/local/bin/scripts && \
-    chmod +x /usr/local/bin/server-binary.sh && \
     chmod +x /entrypoint.sh
 
 # 8. Finalize switch to user to get out of root.
