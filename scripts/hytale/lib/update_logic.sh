@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Load dependencies
+. "$(dirname "$0")/../../utils.sh"
+
 # Shared download function
 perform_hytale_download() {
     local path="$1"

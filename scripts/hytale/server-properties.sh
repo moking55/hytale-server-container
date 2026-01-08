@@ -1,8 +1,10 @@
 #!/bin/sh
 set -eu
 
+# Load dependencies
+. "$(dirname "$0")/../utils.sh"
 
-# 2. Configure server.properties (Using $HOME)
+# Configure server.properties (Using $HOME)
 if [ ! -f "$PROPERTIES_FILE" ]; then
     log "[init]" "Creating server.properties..." "$CYAN"
     printf "server-ip=%s\nserver-port=%s\nquery.port=%s\n" "$SERVER_IP" "$SERVER_PORT" "$SERVER_PORT" > "$PROPERTIES_FILE"

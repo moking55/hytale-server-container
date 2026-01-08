@@ -1,6 +1,9 @@
 #!/bin/sh
 set -eu
 
+# Load dependencies
+. "$(dirname "$0")/../utils.sh"
+
 # EULA Check (Redirected to $HOME)
 case "$EULA" in
     [Tt][Rr][Uu][Ee])

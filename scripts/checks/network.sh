@@ -1,15 +1,9 @@
 #!/bin/sh
 set -eu
 
-LIB_DIR="$(dirname "$0")/lib"
-
 # Load dependencies
-. "$LIB_DIR/utils.sh"
-. "$LIB_DIR/network_logic.sh"
-
-# Configuration defaults
-SERVER_PORT="${SERVER_PORT:-25565}"
-SERVER_IP="${SERVER_IP:-0.0.0.0}"
+. "$(dirname "$0")/../utils.sh"
+. "$(dirname "$0")/lib/network_logic.sh"
 
 log "Starting network configuration audit..." "$BLUE" "network-check"
 

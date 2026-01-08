@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Load dependencies
+. "$(dirname "$0")/../../utils.sh"
+
 validate_port_cfg() {
     if [ -n "$SERVER_PORT" ]; then
         if ! echo "$SERVER_PORT" | grep -Eq '^[0-9]+$' || [ "$SERVER_PORT" -lt 1 ] || [ "$SERVER_PORT" -gt 65535 ]; then

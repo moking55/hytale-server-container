@@ -1,7 +1,10 @@
 #!/bin/sh
 
+# Load dependencies
+. "$(dirname "$0")/../../utils.sh"
+
 check_integrity() {
-    if [ -f "$SERVER_PATH" ]; then
+    if [ -f "$SERVER_JAR_PATH" ]; then
         if [ -n "${SERVER_JAR_SHA256:-}" ]; then
             if echo "${SERVER_JAR_SHA256}  ${SERVER_PATH}" | sha256sum -c - >/dev/null 2>&1; then
                 log "Security: SHA256 matches." "$GREEN"
@@ -11,15 +14,15 @@ check_integrity() {
             fi
         fi
         
-        PERMS=$(stat -c "%a" "$SERVER_PATH")
+        PERMS=$(stat -c "%a" "$SERVER_JAR_PATH")
         if [ "$PERMS" != "444" ]; then
             log "Warning: JAR permissions are $PERMS (Expected 444)." "$YELLOW"
-            chmod 444 "$SERVER_PATH" && log "Permissions fixed to 444." "$BLUE"
+            chmod 444 "$SERVER_JAR_PATH" && log "Permissions fixed to 444." "$BLUE"
         else
             log "Security: Server JAR is read-only (444)." "$GREEN"
         fi
     else
-        log "CRITICAL: Server JAR missing at $SERVER_PATH!" "$RED"
+        log "CRITICAL: Server JAR missing at $SERVER_JAR_PATH!" "$RED"
         exit 1
     fi
 }
