@@ -1,37 +1,40 @@
 #!/bin/sh
 set -eu
 
-# Use absolute paths to avoid confusion
-SCRIPTS_PATH="/usr/local/bin/scripts"
-. "$SCRIPTS_PATH/utils.sh"
-
 # Configuration defaults
+SCRIPTS_PATH="/usr/local/bin/scripts"
 SERVER_PORT="${SERVER_PORT:-25565}"
 SERVER_IP="${SERVER_IP:-0.0.0.0}"
-SERVER_JAR_PATH="/usr/local/lib/hytale-server.jar"
-AUTO_UPDATE=${AUTO_UPDATE:-false}
+AUTO_UPDATE="${AUTO_UPDATE:-false}"
+MINECRAFT="${MINECRAFT:-FALSE}" # Added default to prevent crash
 
-# 1. Hytale JAR Management
-if [ ! -f "$SERVER_JAR_PATH" ]; then
-    log "Initial setup: Download JAR" "$YELLOW" "setup"
-    # Ensure this filename matches your repo exactly
-    sh "$SCRIPTS_PATH/hytale/download-server-binary.sh"
-else
-    # Auto-update check
-    sh "$SCRIPTS_PATH/hytale/auto-update.sh"
+. "$SCRIPTS_PATH/utils.sh"
+
+# Minecraft Fallback Logic
+if [ "$MINECRAFT" = "TRUE" ]; then
+    echo "🎮 MINECRAFT=TRUE: Checking for server JAR..."
+    
+    # Download to the current working directory (/home/container)
+    if [ ! -f "server.jar" ]; then
+        echo "📥 Downloading Minecraft Server (Latest Stable)..."
+        curl -o server.jar https://piston-data.mojang.com/v1/objects/84100236a2829286d11da9287c88019e34c919d7/server.jar
+    else
+        echo "✅ server.jar already exists, skipping download."
+    fi
 fi
 
-# 2. Config & EULA (Found in /scripts/hytale/)
+# 1. Config & EULA
 sh "$SCRIPTS_PATH/checks/server-properties.sh"
 sh "$SCRIPTS_PATH/hytale/eula.sh"
 
-# 3. Audits (Found in /scripts/checks/)
+# 2. Audits
 sh "$SCRIPTS_PATH/checks/network.sh"
 sh "$SCRIPTS_PATH/checks/security.sh"
 
-# 4. Pterodactyl Variable Parsing
-MODIFIED_STARTUP=$(eval echo $(echo "${STARTUP}" | sed -e 's/{{/${/g' -e 's/}}/}/g'))
+# 3. Pterodactyl Variable Parsing
+# Note: Ensure your Pterodactyl Startup string points to the right JAR!
+MODIFIED_STARTUP=$(eval echo $(echo "${STARTUP:-java -jar server.jar}" | sed -e 's/{{/${/g' -e 's/}}/}/g'))
 
-# 5. Execution
-log "Starting Hytale..." "$GREEN" "status"
+# 4. Execution
+log "🚀 Starting Server..." "$GREEN" "status"
 exec ${MODIFIED_STARTUP}

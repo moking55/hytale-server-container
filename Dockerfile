@@ -6,10 +6,6 @@ ARG TARGETOS
 ARG TARGETARCH
 ARG TARGETVARIANT
 
-ARG SERVER_JAR_URL
-ARG SERVER_JAR_SHA256
-ENV SERVER_JAR_SHA256=${SERVER_JAR_SHA256}
-
 # Sets the user and home directory for Pterodactyl compatibility.
 ENV USER=container
 ENV HOME=/home/container
@@ -22,10 +18,8 @@ LABEL org.opencontainers.image.title="docker-hytale-server" \
 # Runtime config
 ENV EULA="" \
     AUTO_UPDATE="" \
-    SERVER_JAR="" \
     SERVER_IP="" \
     SERVER_PORT="" \
-    SERVER_JAR_SHA256="" \
     JAVA_OPTS="" \
     UID=1000 \
     GID=1000
