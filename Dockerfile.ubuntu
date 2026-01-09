@@ -32,8 +32,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=tianon/gosu:1.19 /gosu /usr/local/bin/
 RUN chmod +x /usr/local/bin/gosu
 
-# 3. Setup User (Replaces run.sh setup-user)
-RUN groupadd -g ${GID} ${USER} && \
+# 3. Setup User (Fixed to handle existing GID/UID 1000)
+RUN if getent group ${GID}; then groupdel $(getent group ${GID} | cut -d: -f1); fi && \
+    if getent passwd ${UID}; then userdel -f $(getent passwd ${UID} | cut -d: -f1); fi && \
+    groupadd -g ${GID} ${USER} && \
     useradd -m -d ${HOME} -u ${UID} -g ${USER} ${USER}
 
 # 4. Persistent Data
