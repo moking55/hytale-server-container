@@ -58,6 +58,6 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           # Tags: experimental-ubuntu and experimental-alpine
-          tags: freudend/hytale-server:experimental-${{ matrix.os_type }}
+          tags: freudend/hytale-server:${{ matrix.tag_name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

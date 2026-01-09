@@ -7,6 +7,7 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/deinfreu/docker-hytale-server?style=for-the-badge)](https://github.com/deinfreu/docker-hytale-server)
 [![Discord](https://img.shields.io/discord/1458149014808821965?style=for-the-badge&label=Discord&labelColor=5865F2)](https://discord.gg/2kn2T6zpaV)
 [![Docker Pulls](https://img.shields.io/docker/pulls/freudend/hytale-server?style=for-the-badge)](https://hub.docker.com/r/freudend/hytale-server)
+[![Docker Image Size (tag)](https://img.shields.io/docker/image-size/freudend/hytale-server/experimental-alpine?sort=date&style=for-the-badge&label=ALPINE%20IMAGE%20SIZE)](https://hub.docker.com/layers/freudend/hytale-server/experimental-alpine/images/sha256-30b17add6f24197af645bb6bdc6c8d41921e9663ab96663145c5142678059337)
 [![Docker Image Size](https://img.shields.io/docker/image-size/freudend/hytale-server/experimental?style=for-the-badge)](https://hub.docker.com/r/freudend/hytale-server/tags)
 [![GitHub license](https://img.shields.io/github/license/deinfreu/docker-hytale-server?style=for-the-badge)](https://github.com/deinfreu/docker-hytale-server/blob/main/LICENSE)
 
