@@ -1,4 +1,4 @@
-name: Experimental branch
+name: 🚀 Publish: Experimental ➔ Docker Hub (:experimental)
 
 on:
   push:

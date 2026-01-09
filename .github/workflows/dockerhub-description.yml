@@ -1,4 +1,4 @@
-name: Update Docker Hub Description
+name: 📦 Sync Documentation to Docker Hub
 on:
   push:
     branches:
