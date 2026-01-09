@@ -2,12 +2,12 @@
 set -eu
 
 # Configuration defaults
-SCRIPTS_PATH="/usr/local/bin/scripts"
-PROPERTIES_FILE="server.properties"
-SERVER_PORT="${SERVER_PORT:-25565}"
-SERVER_IP="${SERVER_IP:-0.0.0.0}"
-AUTO_UPDATE="${AUTO_UPDATE:-false}"
-MINECRAFT="${MINECRAFT:-FALSE}"
+export SCRIPTS_PATH="/usr/local/bin/scripts"
+export PROPERTIES_FILE="server.properties"
+export SERVER_PORT="${SERVER_PORT:-25565}"
+export SERVER_IP="${SERVER_IP:-0.0.0.0}"
+export AUTO_UPDATE="${AUTO_UPDATE:-false}"
+export MINECRAFT="${MINECRAFT:-FALSE}"
 
 # Load utilities (like the 'log' function)
 . "$SCRIPTS_PATH/utils.sh"
