@@ -51,7 +51,9 @@ RUN apk add --no-cache \
     iproute2 \
     gcompat \
     libc6-compat \
-    libstdc++ && \
+    libstdc++ \
+    tzdata \
+    coreutils && \
     ln -s /sbin/su-exec /usr/local/bin/gosu && \
     addgroup -S -g ${GID} ${USER} && \
     adduser -S -D -h ${HOME} -u ${UID} -G ${USER} ${USER}

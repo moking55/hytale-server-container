@@ -1,6 +1,8 @@
 services:
   hytale:
-    image: freudend/hytale-server:experimental-alpine-liberica
+    build:
+      context: .
+      dockerfile: Dockerfile.alpine-liberica
     container_name: hytale-server
     environment:
       EULA: "${EULA}"
