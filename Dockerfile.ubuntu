@@ -4,60 +4,57 @@ FROM eclipse-temurin:25.0.1_8-jre
 # Multi-arch support
 ARG TARGETOS
 ARG TARGETARCH
-ARG TARGETVARIANT
 
 # Sets the user and home directory for Pterodactyl compatibility.
 ENV USER=container
 ENV HOME=/home/container
 
-# Metadata
-LABEL org.opencontainers.image.title="docker-hytale-server" \
-    org.opencontainers.image.description="Minimal Hytale server image optimized for performance, security, and AppArmor" \
-    org.opencontainers.image.source="https://github.com/freudend/docker-hytale-server"
-
 # Runtime config
 ENV EULA="" \
     AUTO_UPDATE="" \
     SERVER_IP="" \
-    SERVER_PORT="" \
+    SERVER_PORT=25565 \
     JAVA_OPTS="" \
     UID=1000 \
     GID=1000
 
-# BuildKit mount for platform-specific package installation
-ARG EXTRA_DEB_PACKAGES=""
-
-# 1. Install Dependencies (Cached Layer)
-# We install dos2unix and iproute2 here so they are ready for later steps
-RUN --mount=target=/build,source=build \
-    TARGET=${TARGETARCH}${TARGETVARIANT} \
-    sh /build/run.sh install-packages
+# 1. Install Dependencies
+# Added tini for the ENTRYPOINT and iproute2 for HEALTHCHECK
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tini \
+    iproute2 \
+    dos2unix \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # 2. Add Gosu (Privilege dropping)
 COPY --from=tianon/gosu:1.19 /gosu /usr/local/bin/
 RUN chmod +x /usr/local/bin/gosu
 
-# 3. Setup User (Cached Layer)
-RUN --mount=target=/build,source=build \
-    sh /build/run.sh setup-user
+# 3. Setup User (Replaces run.sh setup-user)
+RUN groupadd -g ${GID} ${USER} && \
+    useradd -m -d ${HOME} -u ${UID} -g ${USER} ${USER}
 
 # 4. Persistent Data
 WORKDIR ${HOME}
 
-# 5. copy over the scripts and the etnrypoint.sh file
-COPY scripts/ /usr/local/bin/scripts
+# 5. Copy scripts and entrypoint
+COPY scripts/ /usr/local/bin/scripts/
 COPY entrypoint.sh /entrypoint.sh
 
-# 6. Perform all file operations in one RUN to minimize layers
+# 6. Fix permissions and line endings
+# We set ownership to the container user for the home directory and scripts
 RUN find /usr/local/bin/scripts -type f -name "*.sh" -exec dos2unix {} + && \
     dos2unix /entrypoint.sh && \
-    chmod -R 755 /usr/local/bin/scripts && \
-    chmod +x /entrypoint.sh
+    chmod -R +x /usr/local/bin/scripts && \
+    chmod +x /entrypoint.sh && \
+    chown -R ${USER}:${USER} ${HOME} /usr/local/bin/scripts /entrypoint.sh
 
-# 7. Finalize switch to user to get out of root.
+# 7. Finalize switch to user
 USER ${USER}
 
-# 8. Expose Hytale server port (UDP for QUIC support)
+# 8. Ports
 EXPOSE 25565/udp
 EXPOSE 25565/tcp
 
@@ -65,20 +62,14 @@ EXPOSE 25565/tcp
 STOPSIGNAL SIGTERM
 
 # 10. Healthcheck
-# Note: Requires iproute2 (installed in step 1)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=2m --retries=3 \
-    CMD ss -ulpn | grep -q ":${SERVER_PORT:-25565}" || exit 1
+    CMD ss -ulpn | grep -q ":${SERVER_PORT}" || exit 1
 
 # 11. Build metadata
 ARG BUILDTIME=local
 ARG VERSION=local
 ARG REVISION=local
-COPY <<EOF /etc/image.properties
-buildtime=${BUILDTIME}
-version=${VERSION}
-revision=${REVISION}
-EOF
+RUN printf "buildtime=${BUILDTIME}\nversion=${VERSION}\nrevision=${REVISION}" > /etc/image.properties
 
 # 12. FINAL Proper init + startup
-ENTRYPOINT ["/usr/bin/tini", "--"]
-CMD ["/bin/sh", "/entrypoint.sh"]
+# Note: Ubuntu's tini is usually at /usr/bin
