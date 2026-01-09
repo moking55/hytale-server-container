@@ -1,0 +1,78 @@
+# syntax=docker/dockerfile:1.7
+FROM eclipse-temurin:25.0.1_8-jre-alpine-3.23
+
+# Multi-arch support (Keep these for internal BuildKit use if needed)
+ARG TARGETOS
+ARG TARGETARCH
+
+# Sets the user and home directory for Pterodactyl compatibility.
+ENV USER=container
+ENV HOME=/home/container
+
+# Runtime config
+ENV EULA="" \
+    AUTO_UPDATE="" \
+    SERVER_IP="" \
+    SERVER_PORT=25565 \
+    JAVA_OPTS="" \
+    UID=1000 \
+    GID=1000
+
+# 1. Install Dependencies & su-exec
+# Added tini for the ENTRYPOINT and iproute2 for HEALTHCHECK
+RUN apk add --no-cache \
+    su-exec \
+    tini \
+    bash \
+    dos2unix \
+    iproute2 \
+    curl && \
+    ln -s /sbin/su-exec /usr/local/bin/gosu
+
+# 2. Setup User (Replaces run.sh setup-user)
+RUN addgroup -S -g ${GID} ${USER} && \
+    adduser -S -D -h ${HOME} -u ${UID} -G ${USER} ${USER}
+
+# 3. Persistent Data
+WORKDIR ${HOME}
+
+# 4. Copy scripts and entrypoint
+COPY scripts/ /usr/local/bin/scripts/
+COPY entrypoint.sh /entrypoint.sh
+
+# 5. Fix permissions and line endings
+# We do this as root before switching users
+RUN find /usr/local/bin/scripts -type f -name "*.sh" -exec dos2unix {} + && \
+    dos2unix /entrypoint.sh && \
+    chmod -R +x /usr/local/bin/scripts && \
+    chmod +x /entrypoint.sh && \
+    chown -R ${USER}:${USER} ${HOME} /usr/local/bin/scripts /entrypoint.sh
+
+# 6. Finalize switch to user
+USER ${USER}
+
+# 7. Ports
+EXPOSE 25565/udp
+EXPOSE 25565/tcp
+
+# 8. Graceful shutdown
+STOPSIGNAL SIGTERM
+
+# 9. Healthcheck (Uses the ENV variable)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=2m --retries=3 \
+    CMD ss -ulpn | grep -q ":${SERVER_PORT}" || exit 1
+
+# 10. Build metadata
+ARG BUILDTIME=local
+ARG VERSION=local
+ARG REVISION=local
+COPY <<EOF /etc/image.properties
+buildtime=${BUILDTIME}
+version=${VERSION}
+revision=${REVISION}
+EOF
+
+# 11. FINAL Startup
+# Using tini for proper signal handling (SIGTERM)
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["/bin/sh", "/entrypoint.sh"]
