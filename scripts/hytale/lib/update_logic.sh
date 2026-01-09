@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Load dependencies
-. "$(dirname "$0")/../../utils.sh"
+. "$SCRIPTS_PATH/utils.sh"
 
 # Shared download function
 perform_hytale_download() {

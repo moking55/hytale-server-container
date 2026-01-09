@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Load dependencies
-. "$(dirname "$0")/../../utils.sh"
+. "$SCRIPTS_PATH/utils.sh"
 
 check_java_mem() {
     XMX_RAW=$(echo "${JAVA_OPTS:-}" | grep -oE 'Xmx[0-9]+[gGmM]' | tr -d 'Xmx')

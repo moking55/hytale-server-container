@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Load dependencies
-. "$(dirname "$0")/../../utils.sh"
+. "$SCRIPTS_PATH/utils.sh"
 
 check_integrity() {
     if [ -f "$SERVER_JAR_PATH" ]; then

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Load dependencies
-. "$(dirname "$0")/../../utils.sh"
+. "$SCRIPTS_PATH/utils.sh"
 
 validate_port_cfg() {
     if [ -n "$SERVER_PORT" ]; then
