@@ -23,12 +23,11 @@ Deploy a production-ready Hytale server in seconds with automated diagnostics, h
 ## 🤝 Support & Resources
 
 * **Documentation:** Detailed performance optimizations and security specifications are located in the [Project Wiki](https://deinfreu.github.io/docker-hytale-server/).
-* **Troubleshooting:** Consult the [FAQ](../../wiki/FAQ) and our [Security Policy](SECURITY.md) before reporting issues. You can also visit our [Discord](https://discord.com/invite/2kn2T6zpaV)!
-* **Issue Tracking:** Can't find what you're looking for? [Open a new issue](issues/new) and I'll be happy to help.
+* **Troubleshooting:** Consult the [FAQ](https://deinfreu.github.io/docker-hytale-server/faq.html) and our [Security Policy](SECURITY.md) before reporting issues. You can also visit our [Discord](https://discord.com/invite/2kn2T6zpaV)!
 
 ## ⚡️ Quick start
 
-Install docker [CLI](https://docs.docker.com/engine/install/) on linux or the [GUI](https://docs.docker.com/desktop) on windows and macos.
+Install docker [CLI](https://docs.docker.com/engine/install/) on linux or the [GUI](https://docs.docker.com/desktop) on windows, macos and linux
 
 You can run the container by running this in your CLI
 ```bash
@@ -37,7 +36,7 @@ docker run -d \
   --restart unless-stopped \
   -e EULA="TRUE" \
   -p 5520:5520/udp \
-  -v ./data:/home/container \
+  -v freudend-docker-hytale-server:/home/container \
   freudend/docker-hytale-server:latest
 ```
 
@@ -46,17 +45,15 @@ Alternatively, you can deploy using Docker Compose. Use the configuration below 
 ```bash
 services:
   hytale:
-    image: freudend/hytale-server:experimental
+    image: freudend/hytale-server:latest
     container_name: hytale-server
     environment:
       EULA: "TRUE"               
-    restart: no
+    restart: unless-stopped
     ports:
       - "5520:5520/udp"
     volumes:
-      - ./data:/data                        # Mounts the host's ./data folder to the container's /data directory (host:docker).
-      - /etc/localtime:/etc/localtime:ro    # Uses the local time of the host machine
-      - /etc/timezone:/etc/timezone:ro      # Uses the local timezone of the host machine
+      - ./data:/home/container
 ```
 
 That's all you need to know to start! 🎉
