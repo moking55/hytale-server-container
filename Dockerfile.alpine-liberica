@@ -51,7 +51,7 @@ ENV USER=container \
 # 1. Consolidated dependencies and User creation
 # Using --no-cache and cleaning up after apk
 RUN apk add --no-cache \
-    curl su-exec tini bash gcompat \
+    curl su-exec tini gcompat \
     libc6-compat libstdc++ tzdata && \
     addgroup -S -g ${GID} ${USER} && \
     adduser -S -D -h ${HOME} -u ${UID} -G ${USER} ${USER}
@@ -79,4 +79,4 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
     CMD nc -zu localhost $SERVER_PORT || exit 1
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["/bin/bash", "/entrypoint.sh"]
+CMD ["/bin/sh", "/entrypoint.sh"]

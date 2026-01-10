@@ -25,7 +25,7 @@ RUN if getent passwd ${UID} > /dev/null 2>&1; then \
         groupmod -n ${USER} $(getent group ${GID} | cut -d: -f1) || true; \
     else \
         groupadd -g ${GID} ${USER} && \
-        useradd -m -d ${HOME} -u ${UID} -g ${USER} -s /bin/bash ${USER}; \
+        useradd -m -d ${HOME} -u ${UID} -g ${USER} -s /bin/sh ${USER}; \
     fi
 
 WORKDIR ${HOME}
@@ -57,4 +57,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=2m --retries=3 \
 # 7. EXECUTION (The missing part)
 # We use /usr/bin/tini for Ubuntu
 ENTRYPOINT ["/usr/bin/tini", "--"]
-CMD ["/bin/bash", "/entrypoint.sh"]
+CMD ["/bin/sh", "/entrypoint.sh"]
