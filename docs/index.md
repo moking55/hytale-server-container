@@ -18,7 +18,7 @@ To get the most performance out of your server, I suggest taking a look at the [
 
 ## ✨ Key Features
 
-* **🚀 Very fast:** From start to finish you can join the server within 23 seconds! [Git benchmark](https://github.com/deinfreu/docker-hytale-server/actions). image used: `alpine-liberica-slim`.
+* **🚀 Very fast:** From start to finish you can join the server within 18 seconds! [Git benchmark](https://github.com/deinfreu/docker-hytale-server/actions). image used: `alpine-liberica-slim`.
 * **⚡ Easy Deployment:** Get your server up and running in seconds using Docker or Docker Compose.
 * **🤖 Smart CLI:** Includes the `hytale-cli` tool to manage server binaries and check for updates automatically.
 * **🍓 Multi-Arch Support:** Optimized for `x86_64` (PC/Servers) and `ARM64` (Raspberry Pi/Apple Silicon).
