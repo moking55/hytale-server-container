@@ -3,6 +3,11 @@ title: Hytale Docker Server
 description: A lightweight Dockerized environment for Hytale servers.
 theme: jekyll-remote-theme
 
+# Navigation
+header_pages:
+  - index.md
+  - setup.md
+
 # Theme settings
 remote_theme: just-the-docs/just-the-docs
 color_scheme: dark # Perfect for gaming/server projects
