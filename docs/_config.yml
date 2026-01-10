@@ -8,6 +8,9 @@ header_pages:
   - index.md
   - installation.md
 
+ga_tracking: G-LTJ9Q1EP31
+ga_tracking_anonymize_ip: true # Use GDPR compliant Google Analytics settings (true/nil by default)
+
 # Theme settings
 remote_theme: just-the-docs/just-the-docs
 color_scheme: dark # Perfect for gaming/server projects
