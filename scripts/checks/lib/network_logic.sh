@@ -1,58 +1,71 @@
-#!/bin/sh
-
+#!/bin/bash
 # Load dependencies
 . "$SCRIPTS_PATH/utils.sh"
 
 check_connectivity() {
-    if curl -s --connect-timeout 5 https://google.com > /dev/null; then
-        log "Internet access verified." "$GREEN" "conn"
-        PUBLIC_IP=$(curl -s --connect-timeout 5 https://api.ipify.org)
-        log "Public IP: $PUBLIC_IP" "$GREEN" "conn"
+    log_step "Internet Connectivity"
+    # Get Public IP while checking connection
+    if PUBLIC_IP=$(curl -s --connect-timeout 5 https://api.ipify.org); then
+        log_success
+        echo -e "      ${DIM}↳ Public IP:${NC} ${GREEN}${PUBLIC_IP}${NC}"
     else
-        log "Warning: No internet access. Auth & Updates will fail." "$YELLOW" "conn"
+        log_error "External connection failed." \
+        "The container cannot reach api.ipify.org. Check your Docker DNS or host firewall."
     fi
 }
 
 validate_port_cfg() {
-    if [ -n "$SERVER_PORT" ]; then
-        if ! echo "$SERVER_PORT" | grep -Eq '^[0-9]+$' || [ "$SERVER_PORT" -lt 1 ] || [ "$SERVER_PORT" -gt 65535 ]; then
-            log "Warning: SERVER_PORT '$SERVER_PORT' is invalid (1-65535)." "$YELLOW" "cfg"
-        else
-            log "Port $SERVER_PORT is a valid integer." "$GREEN" "cfg"
-        fi
+    log_step "Port Validity"
+    local port="${SERVER_PORT:-23000}"
+    
+    if ! echo "$port" | grep -Eq '^[0-9]+$' || [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
+        log_error "Invalid port: $port" \
+        "SERVER_PORT must be a number between 1 and 65535."
+        exit 1
+    else
+        log_success
     fi
 }
 
 check_port_availability() {
-    # Check if the port is already bound (prevents "Address already in use" crashes)
-    if ss -ulpn | grep -q ":$SERVER_PORT "; then
-        log "CRITICAL: Port $SERVER_PORT is ALREADY in use by another process!" "$RED" "net"
+    local port="${SERVER_PORT:-23000}"
+    log_step "Port $port Availability"
+    
+    # Check if the port is already bound
+    if ss -ulpn | grep -q ":$port "; then
+        log_error "Port $port is ALREADY in use!" \
+        "Another process is using this port. Change SERVER_PORT or stop the conflicting container."
+        exit 1
     else
-        log "Port $SERVER_PORT is available for binding." "$GREEN" "net"
+        log_success
     fi
 }
 
 check_udp_stack() {
-    log "Testing UDP socket responsiveness..." "$BLUE" "net"
-    if (echo > /dev/udp/127.0.0.1/"$SERVER_PORT") 2>/dev/null; then
-        log "QUIC: Local UDP loopback is reachable." "$GREEN" "net"
+    # Testing UDP Socket Responsiveness
+    log_step "Local UDP Loopback"
+    if (echo > /dev/udp/127.0.0.1/"${SERVER_PORT:-23000}") 2>/dev/null; then
+        log_success
     else
-        log "Warning: Shell /dev/udp redirection not supported or blocked." "$YELLOW" "net"
+        log_warning "Shell /dev/udp not supported." \
+        "This is common in minimal Alpine shells and can usually be ignored."
     fi
-
+    
     # QUIC Buffer Checks
-    RMEM_PATH="/proc/sys/net/core/rmem_max"
-    WMEM_PATH="/proc/sys/net/core/wmem_max"
-
-    if [ -r "$RMEM_PATH" ] && [ -r "$WMEM_PATH" ]; then
-        RMEM_MAX=$(cat "$RMEM_PATH")
-        WMEM_MAX=$(cat "$WMEM_PATH")
-        if [ "$RMEM_MAX" -lt 2097152 ] || [ "$WMEM_MAX" -lt 2097152 ]; then
-            log "Warning: UDP buffers are small (rmem=$RMEM_MAX). QUIC may drop packets." "$YELLOW" "net"
+    local RMEM_PATH="/proc/sys/net/core/rmem_max"
+    
+    log_step "UDP Socket Buffer Size"
+    if [ -r "$RMEM_PATH" ]; then
+        local RMEM_MAX=$(cat "$RMEM_PATH")
+        
+        if [ "$RMEM_MAX" -lt 2097152 ]; then
+            log_warning "UDP buffers are low ($RMEM_MAX)." \
+            "QUIC performance may suffer. Recommended: sysctl -w net.core.rmem_max=2097152"
         else
-            log "QUIC: UDP buffers are optimized." "$GREEN" "net"
+            log_success
         fi
     else
-        log "Warning: Cannot read UDP buffer limits. Access restricted." "$YELLOW" "net"
+        log_error "Cannot read UDP limits." \
+        "Access to /proc/sys/net is restricted. Container may lack NET_ADMIN capabilities."
     fi
 }

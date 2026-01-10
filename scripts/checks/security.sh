@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -eu
 
 # Load dependencies
@@ -6,10 +6,12 @@ set -eu
 . "$SCRIPTS_PATH/checks/lib/security_logic.sh"
 
 # Execute
-log "Starting security audit..." "$BLUE"
+log_section "Security & Integrity Audit"
 
+# These functions (inside security_logic.sh) now use the log_step format
 check_integrity
 check_container_hardening
 check_clock_sync
 
-log "Security audit finished." "$GREEN"
+echo -e "\n${BOLD}${GREEN}✔ Security audit finished.${NC}"
+exit 0

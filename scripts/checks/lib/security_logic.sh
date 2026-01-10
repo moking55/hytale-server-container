@@ -1,61 +1,77 @@
-#!/bin/sh
-
+#!/bin/bash
 # Load dependencies
-. "$SCRIPTS_PATH/utils.sh"
+. "${SCRIPTS_PATH:-.}/utils.sh"
 
 check_integrity() {
-    if [ -f "$SERVER_JAR_PATH" ]; then
+    log_step "File System Integrity"
+    
+    if [ -f "${SERVER_JAR_PATH:-}" ]; then
+        local perms
+        perms=$(stat -c "%a" "$SERVER_JAR_PATH")
         
-        PERMS=$(stat -c "%a" "$SERVER_JAR_PATH")
-        if [ "$PERMS" != "444" ]; then
-            log "Warning: JAR permissions are $PERMS (Expected 444)." "$YELLOW"
-            chmod 444 "$SERVER_JAR_PATH" && log "Permissions fixed to 444." "$BLUE"
+        if [ "$perms" != "444" ]; then
+            log_warning "Insecure JAR permissions ($perms)." "Fixing to Read-Only (444) for protection."
+            chmod 444 "$SERVER_JAR_PATH"
         else
-            log "Security: Server JAR is read-only (444)." "$GREEN"
+            log_success
         fi
     else
-        log "CRITICAL: Server JAR missing at $SERVER_JAR_PATH!" "$RED"
+        log_error "Server JAR missing!" "Expected at: $SERVER_JAR_PATH"
         exit 1
     fi
 }
 
 check_container_hardening() {
-    # NoNewPrivs check
-    if grep -q "NoNewPrivs:.*1" /proc/self/status; then
-        log "Security: 'no-new-privileges' is ENABLED." "$GREEN"
+    # 1. Privileges check
+    log_step "Process Privileges"
+    if grep -q "NoNewPrivs:.*1" /proc/self/status 2>/dev/null; then
+        log_success
     else
-        log "WARNING: 'no-new-privileges' is NOT enabled!" "$YELLOW"
+        log_warning "NoNewPrivs disabled." "Container could allow privilege escalation. Use --security-opt=no-new-privileges."
     fi
 
-    # CapDrop check
-    CAP_EFF=$(grep "CapEff:" /proc/self/status | awk '{print $2}')
-    if [ "$CAP_EFF" = "0000000000000000" ]; then
-        log "Security: 'cap_drop: ALL' is ACTIVE." "$GREEN"
+    # 2. Kernel Capabilities
+    log_step "Kernel Capabilities"
+    local cap_eff
+    cap_eff=$(grep "CapEff:" /proc/self/status | awk '{print $2}' || echo "unknown")
+    if [ "$cap_eff" = "0000000000000000" ]; then
+        log_success
     else
-        log "WARNING: Process has kernel capabilities ($CAP_EFF)." "$YELLOW"
+        log_warning "Extra capabilities found." "Process has kernel caps ($cap_eff). Consider 'cap_drop: ALL'."
     fi
 
-    # Root Check
+    # 3. User Identity Check
+    log_step "Non-Root Enforcement"
     if [ "$(id -u)" = "0" ]; then
-        log "CRITICAL: Container is running as ROOT!" "$RED"
+        log_error "Running as ROOT!" "Game servers should never run as root. Set 'user: 1000:1000' in Docker Compose."
         exit 1
+    else
+        log_success
     fi
 }
 
 check_clock_sync() {
-    HTTP_STR=$(curl -sI --connect-timeout 3 https://google.com | grep -i '^date:' | cut -d' ' -f2-7)
-    if [ -n "$HTTP_STR" ]; then
-        CONTAINER_NOW=$(date +%s)
-        NETWORK_NOW=$(date -d "$HTTP_STR" +%s)
-        DIFF=$((CONTAINER_NOW - NETWORK_NOW))
-        ABS_DIFF=${DIFF#-}
+    log_step "Network Time Sync"
+    
+    # Extract date from header safely
+    local http_date
+    http_date=$(curl -sI --connect-timeout 3 https://google.com | grep -i '^date:' | cut -d' ' -f2-7 || echo "")
+    
+    if [ -n "$http_date" ]; then
+        local container_now network_now diff abs_diff
+        container_now=$(date +%s)
+        network_now=$(date -d "$http_date" +%s)
+        diff=$((container_now - network_now))
+        abs_diff=${diff#-} # Absolute value
         
-        if [ "$ABS_DIFF" -gt 60 ]; then
-            log "CRITICAL: Clock drift detected! Container is off by $ABS_DIFF seconds." "$RED"
+        if [ "$abs_diff" -gt 60 ]; then
+            log_error "Clock drift detected!" "Container is off by ${abs_diff}s. This causes SSL and Auth failures."
+            exit 1
         else
-            log "System Time: Synchronized (Drift: ${ABS_DIFF}s)." "$GREEN"
+            log_success
+            echo -e "      ${DIM}↳ Drift: ${abs_diff}s (within acceptable limits)${NC}"
         fi
     else
-        log "System Time: Network verification skipped." "$BLUE"
+        log_warning "Time check skipped." "Could not reach Google to verify network time."
     fi
 }

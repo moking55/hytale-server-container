@@ -1,165 +1,127 @@
-#!/bin/sh
-
+#!/bin/bash
 # Load dependencies
-. "$SCRIPTS_PATH/utils.sh"
+. "${SCRIPTS_PATH:-.}/utils.sh"
 
 check_java_mem() {
-    XMX_RAW=$(echo "${JAVA_OPTS:-}" | grep -oE 'Xmx[0-9]+[gGmM]' | tr -d 'Xmx')
-    XMX_NUM=$(echo "$XMX_RAW" | grep -oE '[0-9]+')
-    XMX_UNIT=$(echo "$XMX_RAW" | grep -oE '[gGmM]')
+    log_section "Memory Integrity"
+    
+    # Extract Xmx value safely
+    local xmx_raw=$(echo "${JAVA_OPTS:-}" | grep -oE 'Xmx[0-9]+[gGmM]' | tr -d 'Xmx' || echo "")
+    local xmx_num=$(echo "$xmx_raw" | grep -oE '[0-9]+' || echo "0")
+    local xmx_unit=$(echo "$xmx_raw" | grep -oE '[gGmM]' || echo "m")
 
-    XMX_MB=0
-    if [ -n "$XMX_NUM" ]; then
-        if [ "$XMX_UNIT" = "g" ] || [ "$XMX_UNIT" = "G" ]; then
-            XMX_MB=$((XMX_NUM * 1024))
-        else
-            XMX_MB=$XMX_NUM
-        fi
+    local xmx_mb=0
+    if [ "$xmx_num" -gt 0 ]; then
+        [[ "$xmx_unit" =~ [gG] ]] && xmx_mb=$((xmx_num * 1024)) || xmx_mb=$xmx_num
     fi
 
-    MEM_LIMIT_FILE=""
-    if [ -f "/sys/fs/cgroup/memory.max" ]; then
-        MEM_LIMIT_FILE="/sys/fs/cgroup/memory.max"
-    elif [ -f "/sys/fs/cgroup/memory/memory.limit_in_bytes" ]; then
-        MEM_LIMIT_FILE="/sys/fs/cgroup/memory/memory.limit_in_bytes"
-    fi
+    # Detect Docker/Cgroup Limits
+    local mem_limit_file=""
+    [ -f "/sys/fs/cgroup/memory.max" ] && mem_limit_file="/sys/fs/cgroup/memory.max"
+    [ -z "$mem_limit_file" ] && [ -f "/sys/fs/cgroup/memory/memory.limit_in_bytes" ] && mem_limit_file="/sys/fs/cgroup/memory/memory.limit_in_bytes"
 
-    if [ -n "$MEM_LIMIT_FILE" ]; then
-        LIMIT_BYTES=$(cat "$MEM_LIMIT_FILE")
-        if [ "$LIMIT_BYTES" != "max" ] && [ "$LIMIT_BYTES" -lt 9000000000000000000 ]; then
-            LIMIT_MB=$((LIMIT_BYTES / 1024 / 1024))
-            if [ "$XMX_MB" -eq 0 ]; then
-                log "Warning: No -Xmx limit detected in JAVA_OPTS." "$YELLOW" "Integrity"
-            elif [ "$XMX_MB" -gt "$LIMIT_MB" ]; then
-                log "CRITICAL: Java Xmx ($XMX_MB MB) exceeds Docker limit ($LIMIT_MB MB)!" "$RED" "Integrity"
+    log_step "Java Heap vs Docker Limit"
+    if [ -n "$mem_limit_file" ]; then
+        local limit_bytes=$(cat "$mem_limit_file")
+        if [ "$limit_bytes" != "max" ] && [ "$limit_bytes" -lt 9000000000000000000 ]; then
+            local limit_mb=$((limit_bytes / 1024 / 1024))
+            
+            if [ "$xmx_mb" -eq 0 ]; then
+                log_warning "No -Xmx limit detected." "Java may grow until Docker kills the container. Add -Xmx to JAVA_OPTS."
+            elif [ "$xmx_mb" -gt "$limit_mb" ]; then
+                log_error "Heap ($xmx_mb MB) exceeds Docker limit ($limit_mb MB)!" "The container will OOM-kill immediately on load."
                 exit 1
             else
-                OVERHEAD=$((LIMIT_MB - XMX_MB))
-                log "Java heap ($XMX_MB MB) fits in Docker limit ($LIMIT_MB MB). Overhead: ${OVERHEAD}MB." "$GREEN" "Integrity"
+                log_success
+                echo -e "      ${DIM}↳ Java Heap: ${xmx_mb}MB | Container: ${limit_mb}MB${NC}"
             fi
         else
-            log "Warning: No Docker container limit detected. Using host memory." "$BLUE" "Integrity"
+            log_warning "No Docker limit detected." "The container has access to all host memory. Be careful with -Xmx settings."
         fi
     fi
 }
 
 check_system_resources() {
+    log_section "System Resources"
+
     # Entropy
-    ENTROPY=$(cat /proc/sys/kernel/random/entropy_avail 2>/dev/null || echo 2048)
-    if [ "$ENTROPY" -lt 1000 ]; then
-        log "Warning: Low system entropy ($ENTROPY). Logins might be slow." "$YELLOW" "Security"
+    log_step "System Entropy"
+    local entropy=$(cat /proc/sys/kernel/random/entropy_avail 2>/dev/null || echo 2048)
+    if [ "$entropy" -lt 1000 ]; then
+        log_warning "Low entropy ($entropy)." "Cryptographic operations (logins/SSL) might be slow. Consider installing haveged."
     else
-        log "High entropy available ($ENTROPY) for encryption." "$GREEN" "Security"
+        log_success
     fi
 
     # File Descriptors
-    FD_LIMIT=$(ulimit -n)
-    if [ "$FD_LIMIT" -lt 4096 ]; then
-        log "Warning: Low File Descriptor limit ($FD_LIMIT). Recommend 4096+." "$YELLOW" "Performance"
+    log_step "File Descriptors"
+    local fd_limit=$(ulimit -n)
+    if [ "$fd_limit" -lt 4096 ]; then
+        log_warning "Low FD limit ($fd_limit)." "Hytale/Minecraft handle many concurrent files. Recommend 4096+."
     else
-        log "File Descriptor limit is sufficient ($FD_LIMIT)." "$GREEN" "Performance"
-    fi
-
-    # Threads
-    MAX_THREADS=$(grep "Max processes" /proc/self/limits | awk '{print $3}')
-    if [ "$MAX_THREADS" = "unlimited" ]; then
-        log "Process Limit: unlimited (Excellent)" "$GREEN" "Performance"
-    elif [ -n "$MAX_THREADS" ] && [ "$MAX_THREADS" -lt 1024 ]; then
-        log "Warning: Process thread limit is low ($MAX_THREADS). Recommend 2048+." "$YELLOW" "Performance"
-    else
-        log "Process Limit: $MAX_THREADS (OK)" "$GREEN" "Performance"
+        log_success
     fi
 }
 
 check_filesystem() {
-    # /tmp access
+    log_section "Filesystem Performance"
+
+    log_step "Writable /tmp"
     if [ ! -w "/tmp" ]; then
-        log "CRITICAL: /tmp is not writable. Java cannot start." "$RED" "Environment"
+        log_error "/tmp is not writable." "Java requires /tmp to extract native libraries."
         exit 1
-    fi
-
-    # /tmp noexec
-    if mount | grep -q "on /tmp .*noexec"; then
-        log "Warning: /tmp is mounted with 'noexec'. Networking may be slower." "$YELLOW" "Performance"
-    fi
-
-    # IO Latency
-    START=$(date +%s)
-    dd if=/dev/zero of=/home/container/.test_io bs=1M count=10 conv=fsync >/dev/null 2>&1
-    END=$(date +%s)
-    IO_TIME=$((END - START))
-    rm -f /home/container/.test_io
-    if [ "$IO_TIME" -gt 2 ]; then
-        log "Warning: Disk IO is slow ($IO_TIME seconds for 10MB)." "$YELLOW" "Performance"
     else
-        log "Disk IO: OK ($IO_TIME seconds)." "$GREEN" "Performance"
+        log_success
     fi
 
-    # OverlayFS check
-    FS_TYPE=$(stat -f -c %T /home/container)
-    if [ "$FS_TYPE" = "overlayfs" ]; then
-        log "Warning: /home/container is on overlayfs. Heavy IO may cause lag." "$YELLOW" "Performance"
+    log_step "IO Latency Check"
+    # Use a temporary file and don't let a cleanup failure kill the script
+    local test_file="/home/container/.test_io_$(date +%s)"
+    local start=$(date +%s)
+    
+    # We use '|| true' and silence errors to prevent strict mode from crashing 
+    # if the dd or rm fails unexpectedly.
+    if dd if=/dev/zero of="$test_file" bs=1M count=10 conv=fsync >/dev/null 2>&1; then
+        local end=$(date +%s)
+        local io_time=$((end - start))
+        
+        # Cleanup: use '|| true' so the script continues even if rm fails
+        rm -f "$test_file" >/dev/null 2>&1 || true
+        
+        if [ "$io_time" -gt 2 ]; then
+            log_warning "Slow Disk IO ($io_time seconds)." "Heavy world generation may cause lag."
+        else
+            log_success
+        fi
     else
-        log "Filesystem for /home/container: $FS_TYPE." "$GREEN" "Performance"
-    fi
-}
-
-check_kernel_optimizations() {
-    # THP
-    if [ -f /sys/kernel/mm/transparent_hugepage/enabled ]; then
-        THP=$(cat /sys/kernel/mm/transparent_hugepage/enabled | grep -o "\[.*\]")
-        if [ "$THP" = "[always]" ]; then
-            log "Warning: THP is set to 'always'. This can cause lag spikes." "$YELLOW" "Performance"
-        else
-            log "Transparent Huge Pages optimized ($THP)." "$GREEN" "Performance"
-        fi
-    fi
-
-    # UDP Buffers
-    RMEM_PATH="/proc/sys/net/core/rmem_max"
-    if [ -r "$RMEM_PATH" ]; then
-        RMEM_MAX=$(cat "$RMEM_PATH")
-        if [ "$RMEM_MAX" -lt 2097152 ]; then
-            log "Warning: UDP receive buffer (rmem_max) is small ($RMEM_MAX bytes)." "$YELLOW" "Performance"
-        else
-            log "UDP receive buffer is optimized ($RMEM_MAX bytes)." "$GREEN" "Performance"
-        fi
+        log_warning "IO Test Failed." "Could not write to /home/container. Check volume permissions."
+        # Ensure we try to clean up just in case
+        rm -f "$test_file" >/dev/null 2>&1 || true
     fi
 }
 
 check_stability() {
-    # 1. Swappiness Check
-    # High swappiness (e.g. 60) makes the kernel move Java heap to disk, causing massive lag.
-    # For game servers, we want this as low as possible (ideally 1-10).
+    log_section "Stability & Kernel"
+
+    # Swappiness
+    log_step "Kernel Swappiness"
     if [ -r /proc/sys/vm/swappiness ]; then
-        SWAP_VAL=$(cat /proc/sys/vm/swappiness)
-        if [ "$SWAP_VAL" -gt 10 ]; then
-            log "Warning: System swappiness is high ($SWAP_VAL). Java GC may be slow." "$YELLOW" "Performance"
+        local swap_val=$(cat /proc/sys/vm/swappiness)
+        if [ "$swap_val" -gt 10 ]; then
+            log_warning "High Swappiness ($swap_val)." "Kernel may swap Java to disk, causing massive lag spikes. Recommended: 1-10."
         else
-            log "System swappiness is optimized ($SWAP_VAL)." "$GREEN" "Performance"
+            log_success
         fi
     fi
 
-    # 2. Time check
-    CUR_YEAR=$(date +%Y)
-    if [ "$CUR_YEAR" -lt 2025 ]; then
-        log "CRITICAL: System clock is incorrect ($CUR_YEAR)." "$RED" "Integrity"
-        exit 1
-    fi
-
-    # 3. OOM Score
+    # OOM Score
+    log_step "OOM Score Adjustment"
     if [ -r /proc/self/oom_score_adj ]; then
-        OOM_SCORE=$(cat /proc/self/oom_score_adj)
-        if [ "$OOM_SCORE" -gt 0 ]; then
-            log "Warning: High OOM score adjustment ($OOM_SCORE). Risk of termination." "$YELLOW" "Security"
-        fi
-    fi
-
-    # 4. Swap usage (Total Amount Used)
-    if [ -r /proc/swaps ]; then
-        SWAP_USED=$(awk 'NR>1 {sum+=$4} END {print sum+0}' /proc/swaps)
-        if [ "$SWAP_USED" -gt 0 ]; then
-            log "Warning: Active swap usage detected ($SWAP_USED KB). Expect lag spikes." "$YELLOW" "Performance"
+        local oom_score=$(cat /proc/self/oom_score_adj)
+        if [ "$oom_score" -gt 0 ]; then
+            log_warning "Process is prioritized for OOM-kill." "Docker or the Host may kill this process first if memory is low."
+        else
+            log_success
         fi
     fi
 }

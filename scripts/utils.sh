@@ -1,20 +1,44 @@
-#!/bin/sh
+#!/bin/bash
 
-# Colors
-RED="\033[0;31m"
-GREEN="\033[0;32m"
-YELLOW="\033[0;33m"
-BLUE="\033[0;34m"
-CYAN="\033[0;36m"
-RESET="\033[0m"
+# --- Colors & Formatting ---
+BOLD='\033[1m'
+DIM='\033[2m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
 
-# Centralized Log Function
-# Usage: log "message" "color" "prefix"
-log() {
-    local msg="$1"
-    local color="${2:-$RESET}"
-    local prefix="${3:-docker-hytale-server}" # Changed default from security-check to hytale
-    
-    # Use printf for better cross-shell compatibility
-    printf "%b[%s] %s%b\n" "$color" "$prefix" "$msg" "$RESET"
+# --- Symbols ---
+# Using :- fallbacks even for internal symbols for ultimate safety
+SYM_OK="${GREEN}✔${NC}"
+SYM_FAIL="${RED}✘${NC}"
+SYM_WARN="${YELLOW}⚠${NC}"
+
+log_section() {
+    echo -e "\n${BOLD}${CYAN}SECTION:${NC} ${BOLD}${1:-}${NC}"
+}
+
+log_step() {
+    printf "  ${NC}%-35s" "${1:-}..."
+}
+
+log_success() {
+    echo -e "[ ${GREEN}OK${NC} ] ${SYM_OK}"
+}
+
+log_warning() {
+    echo -e "[ ${YELLOW}WARN${NC} ] ${SYM_WARN}"
+    echo -e "      ${YELLOW}↳ Note:${NC}  ${1:-}"
+    if [ -n "${2:-}" ]; then
+        echo -e "      ${DIM}↳ Suggestion: ${2}${NC}"
+    fi
+}
+
+log_error() {
+    echo -e "[ ${RED}FAIL${NC} ] ${SYM_FAIL}"
+    echo -e "      ${RED}↳ Error:${NC} ${1:-}"
+    if [ -n "${2:-}" ]; then
+        echo -e "      ${DIM}↳ Hint:   ${2}${NC}"
+    fi
 }
