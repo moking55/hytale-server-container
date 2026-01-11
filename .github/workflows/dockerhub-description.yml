@@ -9,6 +9,11 @@ on:
       - .github/workflows/dockerhub-description.yml
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write  # Optional, but good practice
+  actions: write   # Required for 'type=gha' caching
+
 jobs:
   sync:
     runs-on: ubuntu-latest

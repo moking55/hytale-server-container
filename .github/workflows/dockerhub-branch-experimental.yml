@@ -6,6 +6,11 @@ on:
       - experimental
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write  # Optional, but good practice
+  actions: write   # Required for 'type=gha' caching
+
 jobs:
   # STEP 1: SETUP & AUTH VALIDATION
   setup:
