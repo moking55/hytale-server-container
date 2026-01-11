@@ -33,6 +33,16 @@ jobs:
           source: ./docs
           destination: ./_site
 
+      - name: Generate Sitemap
+        uses: cicirello/generate-sitemap@v1
+        with:
+          base-url-path: https://deinfreu.github.io/docker-hytale-server/
+          source-directory: ./_site  # Points to the Jekyll output
+          drop-html-extension: true
+
+      - name: Move sitemap to Jekyll output
+        run: mv sitemap.xml ./_site/sitemap.xml
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
