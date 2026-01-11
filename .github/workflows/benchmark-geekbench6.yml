@@ -1,0 +1,13 @@
+name: Benchmark Runner
+on: [workflow_dispatch] # Allows you to run it manually
+
+jobs:
+  geekbench:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download and Run Geekbench 6
+        run: |
+          wget https://cdn.geekbench.com/Geekbench-6.5.0-Linux.tar.gz
+          tar xf Geekbench-6.5.0-Linux.tar.gz
+          cd Geekbench-6.5.0-Linux/
+          ./geekbench6
