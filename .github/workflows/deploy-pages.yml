@@ -18,10 +18,11 @@ concurrency:
 jobs:
   deploy:
     environment:
-      TZ: Europe/Amsterdam
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Amsterdam
     steps:
       - name: Check Current Time
         run: date
