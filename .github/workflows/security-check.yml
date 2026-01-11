@@ -1,16 +1,13 @@
-name: Security Scan
+name: "🔍 Security & Shell Lint"
 
 on:
   push:
     branches: [ "experimental" ]
   pull_request:
     branches: [ "experimental" ]
-  schedule:
-    - cron: '30 5 * * 1' # Runs every Monday at 5:30 AM
 
 jobs:
   scan:
-    name: "🔍 Security & Shell Lint"
     runs-on: ubuntu-latest
     permissions:
       security-events: write
@@ -20,22 +17,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 1. Scan Dockerfiles for misconfigurations
-      - name: Run Trivy Config Scan
+      # 1. Hadolint: Checks Dockerfile for best practices
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          recursive: true
+
+      # 2. Trivy: Scans for Vulnerabilities (CVEs) and Config issues
+      - name: Run Trivy Security Scan
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'config'
-          hide-progress: true
+          scan-type: 'config,fs'
           format: 'sarif'
           output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
 
-      # 2. Upload results so they appear in GitHub "Security" tab
-      - name: Upload Trivy scan results
+      - name: Upload Trivy results
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
 
-      # 3. Lint Shell Scripts (Hytale servers use many .sh files)
+      # 3. ShellCheck: Checks your .sh scripts
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './scripts'
