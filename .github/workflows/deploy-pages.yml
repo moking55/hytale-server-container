@@ -3,15 +3,13 @@ name: "📄 Deploy GitHub Pages"
 on:
   push:
     branches: ["experimental"]
-  workflow_dispatch: # Allows manual triggering from the Actions tab
+  workflow_dispatch:
 
-# Permissions required for GITHUB_TOKEN to deploy to Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -29,11 +27,16 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./docs
+          destination: ./_site
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # If your site is in a specific folder (like /docs), change "." to "./docs"
-          path: "./docs"
+          path: "./_site"
 
       - name: Deploy to GitHub Pages
         id: deployment
