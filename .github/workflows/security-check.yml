@@ -24,19 +24,19 @@ jobs:
           recursive: true
           format: sarif
           output-file: hadolint-results.sarif
-          no-fail: true # Set to true so the workflow continues to the upload step
+          no-fail: true
 
       # 2. Upload the Hadolint SARIF file to the Security tab
       - name: Upload Hadolint scan results
-        uses: github/codeql-action/upload-sarif@v3
-        if: always() # Ensures results upload even if linting found errors
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
         with:
           sarif_file: hadolint-results.sarif
           category: hadolint
 
       # 2. Trivy: Scans for Vulnerabilities (CVEs) and Config issues
       - name: Run Trivy Security Scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           scan-type: 'config,fs'
           format: 'sarif'
@@ -44,13 +44,14 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
       - name: Upload Trivy results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
+          category: trivy
 
       # 3. ShellCheck: Checks your .sh scripts
       - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@master
+        uses: ludeeus/action-shellcheck@2.0.0
         with:
           scandir: './scripts'
