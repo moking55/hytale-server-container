@@ -32,7 +32,7 @@ To get the most performance out of your server, I suggest taking a look at the [
 Ready to host your world? Follow our step-by-step guides to get started:
 
 1.  **[Requirements](./installation/requirements.md):** Check if you have your Hytale license key.
-2.  **[Requirements](./installation/system_requirements.md):** Check if your hardware is ready.
+2.  **[System Requirements](./installation/system_requirements.md):** Check if your hardware is ready.
 3.  **[Container Installation](./installation/container_installation.md):** Deploy your first server using CLI or Compose.
 4.  **[Debug](./installation/debug.md):** Learn how to debug your installation.
 5.  **[Support](./installation/support.md.md):** Is your installation not working?
