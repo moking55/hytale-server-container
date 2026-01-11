@@ -1,34 +1,41 @@
-name: "🔍 Daily Vulnerability Audit (Trivy)"
+name: Security Scan
 
 on:
+  push:
+    branches: [ "experimental" ]
+  pull_request:
+    branches: [ "experimental" ]
   schedule:
-    # Runs at 00:00 UTC every day
-    - cron: '0 0 * * *'
-  workflow_dispatch:
-    # Allows you to trigger the scan manually from the Actions tab
-
-permissions:
-  contents: read        # To check out the code
-  security-events: write # To upload SARIF results to the Security tab
-  actions: read         # Required for some security integrations
+    - cron: '30 5 * * 1' # Runs every Monday at 5:30 AM
 
 jobs:
-  trivy_scan:
-    name: Trivy Security Scan
+  scan:
+    name: "🔍 Security & Shell Lint"
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Trivy vulnerability scanner
+      # 1. Scan Dockerfiles for misconfigurations
+      - name: Run Trivy Config Scan
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'freudend/docker-hytale-server:latest'
+          scan-type: 'config'
+          hide-progress: true
           format: 'sarif'
           output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
 
-      - name: Upload results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3 # Updated to v3 for 2026 compatibility
+      # 2. Upload results so they appear in GitHub "Security" tab
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
         with:
           sarif_file: 'trivy-results.sarif'
+
+      # 3. Lint Shell Scripts (Hytale servers use many .sh files)
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master

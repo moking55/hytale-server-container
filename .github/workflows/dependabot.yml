@@ -12,11 +12,10 @@ updates:
 
   # Maintain Docker dependencies (Dockerfiles)
   - package-ecosystem: "docker"
-    directory: "/" # Adjust this if your Dockerfile is in a subfolder like /docker
+    directory: "/"
     schedule:
       interval: "daily"
     target-branch: "experimental"
     labels:
       - "dependencies"
       - "docker"
-    # Optional: If you want to limit the number of open PRs

@@ -11,8 +11,8 @@ on:
 
 permissions:
   contents: read
-  packages: write  # Optional, but good practice
-  actions: write   # Required for 'type=gha' caching
+  packages: write
+  actions: write
 
 jobs:
   sync:
@@ -56,6 +56,5 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
           repository: freudend/hytale-server
-          # Using the output variable from the previous step:
           short-description: ${{ steps.get_info.outputs.DOCKER_DESC }}
           enable-url-completion: true

@@ -8,8 +8,8 @@ on:
 
 permissions:
   contents: read
-  packages: write  # Optional, but good practice
-  actions: write   # Required for 'type=gha' caching
+  packages: write
+  actions: write 
 
 jobs:
   # STEP 1: SETUP & AUTH VALIDATION
@@ -64,7 +64,7 @@ jobs:
 
   # STEP 3: DEPLOYMENT TEST
   test:
-    name: 🧪 Server start test
+    name: 🧪 Server deployment test
     needs: build
     runs-on: ubuntu-latest
     strategy:
