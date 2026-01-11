@@ -36,7 +36,7 @@ jobs:
           GH_DESC="🚀 Hytale Docker Server 📦 ${SIZE_MB}MB (Alpine/Liberica) • Secure non-root execution • Fast QUIC/UDP optimization • Built-in Production & Debug diagnostics • Pterodactyl supported ✅"
           
           # Short version for Docker Hub (Optimized 100 chars)
-          DH_DESC="📦 ${SIZE_MB}MB (Alpine/Liberica) • Non-root • QUIC Optimized • Production & Debug • Pterodactyl ✅"
+          DH_DESC="📦 ${SIZE_MB}MB (Alpine/Liberica) • Non-root • QUIC Enabled • Prod & Debug • Pterodactyl ✅"
           
           # 4. EXPORT THEM PROPERLY
           echo "GITHUB_DESC=$GH_DESC" >> $GITHUB_OUTPUT

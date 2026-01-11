@@ -8,7 +8,7 @@ nav_order: 2
 ## 💻 System Requirements
 
 ### 1. Supported Operating Systems
-* **Linux:** (Ubuntu, Debian, CentOS, etc.) — *Recommended for production.*
+* **Linux:** (Ubuntu, Debian, CentOS, etc.) — *Debian recommended for production.*
 * **Windows:** 10/11 with WSL 2.
 * **macOS:** Intel or Apple Silicon (M1/M2/M3).
 
