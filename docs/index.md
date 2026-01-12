@@ -18,7 +18,7 @@ To get the most performance out of your server, I suggest taking a look at the [
 
 ## ✨ Key Features
 
-* **🚀 Very fast:** From start to finish you can join the server within 18 seconds! [Git benchmark](https://github.com/deinfreu/docker-hytale-server/actions). image used: `alpine-liberica-slim`.
+* **🚀 Very fast:** From start to finish you can join the server within 18 seconds! [Git benchmark](https://github.com/deinfreu/hytale-server-container/actions). image used: `alpine-liberica-slim`.
 * **⚡ Easy Deployment:** Get your server up and running in seconds using Docker or Docker Compose.
 * **🤖 Smart CLI:** Includes the `hytale-cli` tool to manage server binaries and check for updates automatically.
 * **🍓 Multi-Arch Support:** Optimized for `x86_64` (PC/Servers) and `ARM64` (Raspberry Pi/Apple Silicon).
@@ -45,7 +45,7 @@ Ready to host your world? Follow our step-by-step guides to get started:
 If you run into trouble, we have resources available:
 
 * **[Frequently Asked Questions](./faq.md):** Common fixes for connection and time-zone issues.
-* **[GitHub Issues](https://github.com/deinfreu/docker-hytale-server/issues):** Report bugs or request new features.
+* **[GitHub Issues](https://github.com/deinfreu/hytale-server-container/issues):** Report bugs or request new features.
 * **[Discussions](https://discord.gg/M8yrdnHb32):** Connect with other Hytale server owners.
 
 ---

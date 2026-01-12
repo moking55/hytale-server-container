@@ -13,8 +13,8 @@ This image is built with a "Security-First" mindset to protect both the game ser
 
 **Please follow these steps to report security issues:**
 
-* **Submit a Private Advisory**: Please report security issues to [https://github.com/deinfreu/docker-hytale-server/security/advisories/new](https://github.com/deinfreu/docker-hytale-server/security/advisories/new).
-* **Alert the Maintainer**: Please also create an empty security issue to alert me, as GitHub Advisories do not send a notification; I probably will miss it without this: [Submit Alert Issue](https://github.com/deinfreu/docker-hytale-server/issues/new?assignees=&labels=security&template=security_alert.md).
+* **Submit a Private Advisory**: Please report security issues to [https://github.com/deinfreu/hytale-server-container/security/advisories/new](https://github.com/deinfreu/hytale-server-container/security/advisories/new).
+* **Alert the Maintainer**: Please also create an empty security issue to alert me, as GitHub Advisories do not send a notification; I probably will miss it without this: [Submit Alert Issue](https://github.com/deinfreu/hytale-server-container/issues/new?assignees=&labels=security&template=security_alert.md).
 * **No Automated Scans**: Do not report any upstream dependency issues or scan results by any tools. It will be closed immediately without explanation. Unless you have a **Proof of Concept (PoC)** to prove that the upstream issue actually affects this Hytale server image.
 * **Keep it Private**: Do not use the public issue tracker or discuss it in public as it will cause more damage.
 
@@ -36,4 +36,4 @@ Always run this container with memory and CPU limits to prevent a rogue Hytale p
 ### 4. Keep Images Updated
 We regularly rebuild this image to include the latest JRE security patches. Enable automated updates or periodically pull the latest tag:
 ```bash
-docker pull ghcr.io/deinfreu/docker-hytale-server:experimental
+docker pull ghcr.io/deinfreu/hytale-server-container:experimental

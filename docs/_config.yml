@@ -24,6 +24,6 @@ permalink: pretty
 # Aux links (Top right buttons)
 aux_links:
   "GitHub":
-    - "https://github.com/deinfreu/docker-hytale-server"
+    - "https://github.com/deinfreu/hytale-server-container"
   "Docker Hub":
     - "https://hub.docker.com/r/freudend/hytale-server" # Update if different
