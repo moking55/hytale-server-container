@@ -12,10 +12,10 @@
 [![GitHub stars](https://img.shields.io/github/stars/deinfreu/hytale-server-container?style=for-the-badge&color=daaa3f)](https://github.com/deinfreu/hytale-server-container)
 [![GitHub last commit](https://img.shields.io/github/last-commit/deinfreu/hytale-server-container?style=for-the-badge)](https://github.com/deinfreu/hytale-server-container)
 [![Discord](https://img.shields.io/discord/1458149014808821965?style=for-the-badge&label=Discord&labelColor=5865F2)](https://discord.gg/M8yrdnHb32)
-[![Docker Pulls](https://img.shields.io/docker/pulls/freudend/hytale-server?style=for-the-badge)](https://hub.docker.com/r/freudend/hytale-server)
-[![Docker Image Size](https://img.shields.io/docker/image-size/freudend/hytale-server/experimental?style=for-the-badge&label=UBUNTU%20SIZE)](https://hub.docker.com/layers/freudend/hytale-server/experimental/images/)
-[![Docker Image Size (tag)](https://img.shields.io/docker/image-size/freudend/hytale-server/experimental-alpine?sort=date&style=for-the-badge&label=ALPINE%20SIZE)](https://hub.docker.com/layers/freudend/hytale-server/experimental-alpine/images/)
-[![Docker Image Size (tag)](https://img.shields.io/docker/image-size/freudend/hytale-server/experimental-alpine-liberica?sort=date&style=for-the-badge&label=ALPINE%20LIBERICA%20SIZE)](https://hub.docker.com/layers/freudend/hytale-server/experimental-alpine-liberica/images/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/deinfreu/hytale-server?style=for-the-badge)](https://hub.docker.com/r/deinfreu/hytale-server)
+[![Docker Image Size](https://img.shields.io/docker/image-size/deinfreu/hytale-server/experimental?style=for-the-badge&label=UBUNTU%20SIZE)](https://hub.docker.com/layers/deinfreu/hytale-server/experimental/images/)
+[![Docker Image Size (tag)](https://img.shields.io/docker/image-size/deinfreu/hytale-server/experimental-alpine?sort=date&style=for-the-badge&label=ALPINE%20SIZE)](https://hub.docker.com/layers/deinfreu/hytale-server/experimental-alpine/images/)
+[![Docker Image Size (tag)](https://img.shields.io/docker/image-size/deinfreu/hytale-server/experimental-alpine-liberica?sort=date&style=for-the-badge&label=ALPINE%20LIBERICA%20SIZE)](https://hub.docker.com/layers/deinfreu/hytale-server/experimental-alpine-liberica/images/)
 [![GitHub license](https://img.shields.io/github/license/deinfreu/hytale-server-container?style=for-the-badge)](https://github.com/deinfreu/hytale-server-container/blob/main/LICENSE)
 
 Deploy a production-ready Hytale server in seconds with automated diagnostics, hardened security, and optimized networking using a single command with docker.
@@ -38,8 +38,8 @@ docker run -d \
   --restart unless-stopped \
   -e EULA=TRUE \
   -p 5520:5520/udp \
-  -v freudend-hytale-server-container:/home/container \
-  freudend/hytale-server:experimental
+  -v deinfreu-hytale-server-container:/home/container \
+  deinfreu/hytale-server:experimental
 ```
 
 Alternatively, you can deploy using Docker Compose. Use the configuration below or explore the [examples](https://github.com/deinfreu/hytale-server-container/tree/main/examples) folder for more advanced templates.
@@ -47,7 +47,7 @@ Alternatively, you can deploy using Docker Compose. Use the configuration below 
 ```bash
 services:
   hytale:
-    image: freudend/hytale-server:experimental
+    image: deinfreu/hytale-server:experimental
     container_name: hytale-server
     environment:
       - EULA=TRUE

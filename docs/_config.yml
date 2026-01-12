@@ -26,4 +26,4 @@ aux_links:
   "GitHub":
     - "https://github.com/deinfreu/hytale-server-container"
   "Docker Hub":
-    - "https://hub.docker.com/r/freudend/hytale-server" # Update if different
+    - "https://hub.docker.com/r/deinfreu/hytale-server" # Update if different

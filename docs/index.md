@@ -8,7 +8,7 @@ permalink: /
 
 # 🐳 Hytale Docker Server
 
-Welcome to the official documentation for the **`freudend/hytale-server`**. This project provides a high-performance, containerized environment for hosting Hytale servers with ease, featuring automated binary management cross-platform and Pterodactyl support.
+Welcome to the official documentation for the **`deinfreu/hytale-server`**. This project provides a high-performance, containerized environment for hosting Hytale servers with ease, featuring automated binary management cross-platform and Pterodactyl support.
 
 To get the most performance out of your server, I suggest taking a look at the [optimizations](./optimizations.md) page!
 

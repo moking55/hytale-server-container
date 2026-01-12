@@ -58,7 +58,7 @@ jobs:
           file: ./Dockerfile.${{ matrix.os_type }}
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: freudend/hytale-server:${{ matrix.tag_name }}
+          tags: deinfreu/hytale-server:${{ matrix.tag_name }}
           cache-from: type=gha,scope=${{ matrix.tag_name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.tag_name }}
 
@@ -86,7 +86,7 @@ jobs:
             -e DEBUG=FALSE \
             -e PROD=FALSE \
             -e JAVA_OPTS="-Xms10G -Xmx10G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1" \
-            freudend/hytale-server:${{ matrix.tag_name }}
+            deinfreu/hytale-server:${{ matrix.tag_name }}
 
       - name: Wait for Server Ready Log
         run: |
