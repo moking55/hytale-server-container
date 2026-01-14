@@ -35,39 +35,31 @@ export HYTALE_QUIET_FLAGS=""
 # --- 1. Audit Suite ---
 log_section "Audit Suite"
 
-# Run Security and Network checks only if DEBUG is TRUE
-if [ "${DEBUG:-FALSE}" = "TRUE" ]; then
+if [ "$DEBUG" = "TRUE" ]; then
     sh "$SCRIPTS_PATH/checks/security.sh"
     sh "$SCRIPTS_PATH/checks/network.sh"
 else
-    printf "${DIM}System debug skipped (DEBUG=FALSE)${NC}\n"
+    printf "%sSystem debug skipped (DEBUG=FALSE)%s\n" "$DIM" "$NC"
 fi
 
-# Run Production readiness check only if PROD is TRUE
-if [ "${PROD:-FALSE}" = "TRUE" ]; then
+if [ "$PROD" = "TRUE" ]; then
     sh "$SCRIPTS_PATH/checks/prod.sh"
 else
-    printf "${DIM}Production audit skipped (PROD=FALSE)${NC}\n"
+    printf "%sProduction audit skipped (PROD=FALSE)%s\n" "$DIM" "$NC"
 fi
 
-# Check if the server is ARM64 if so then give a warning message.
-# 1. Check for ARM64 Architecture
 ARCH=$(uname -m)
 if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
-    echo "############################################################"
-    echo "  WARNING: UNSUPPORTED ARCHITECTURE DETECTED"
-    echo "############################################################"
-    echo " Architecture: $ARCH"
-    echo ""
-    echo " Hytale-Downloader only works for x86_64 at the moment."
-    echo ""
-    echo " Status: Waiting for Hytale to release the native ARM64"
-    echo "         'hytale-downloader' binary. see the docs."
-    echo "############################################################"
+    printf "############################################################\n"
+    printf "  WARNING: UNSUPPORTED ARCHITECTURE DETECTED\n"
+    printf "############################################################\n"
+    printf " Architecture: %s\n\n" "$ARCH"
+    printf " Hytale-Downloader only works for x86_64 at the moment.\n"
+    printf " Status: Waiting for Hytale to release the native ARM64 binary.\n"
+    printf "############################################################\n"
 fi
 
 # --- 2. Initialization ---
-# This script handles its own log_section internally
 sh "$SCRIPTS_PATH/hytale/hytale_downloader.sh"
 sh "$SCRIPTS_PATH/hytale/hytale_config.sh"
 sh "$SCRIPTS_PATH/hytale/hytale_flags.sh"
@@ -75,18 +67,23 @@ sh "$SCRIPTS_PATH/hytale/hytale_flags.sh"
 # --- 3. Startup Preparation ---
 log_section "Process Execution"
 log_step "Finalizing Environment"
-
-# Ensure we are in the correct directory
 cd "$BASE_DIR"
 log_success
 
 # --- 4. Execution ---
-printf "\n${BOLD}${CYAN}🚀 Launching Hytale Server...${NC}\n\n"
+printf "\n%s🚀 Launching Hytale Server...%s\n\n" "$BOLD$CYAN" "$NC"
 
-# Execute the Java command.
-# Using exec ensures Java becomes PID 1, allowing it to receive shutdown signals properly.
-# Execute the Java command with the new flags added
-exec gosu $USER java $JAVA_ARGS \
+# Choose runtime wrapper depending on availability
+if command -v gosu >/dev/null 2>&1; then
+    RUNTIME="gosu $USER"
+elif command -v su-exec >/dev/null 2>&1; then
+    RUNTIME="su-exec $USER"
+else
+    RUNTIME=""
+fi
+
+# Execute Java server as non-root user
+exec $RUNTIME java $JAVA_ARGS \
     -Dterminal.jline=false \
     -Dterminal.ansi=true \
     $HYTALE_CACHE_FLAG \
