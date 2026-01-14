@@ -41,7 +41,7 @@ docker run -d \
   -e DEBUG="FALSE" \
   -e TZ="Europe/Amsterdam" \
   -p 5520:5520/udp \
-  -v "./data:/home/container" \
+  -v "hytale-server:/home/container" \
   --restart unless-stopped \
   -t -i \
   deinfreu/hytale-server:experimental
