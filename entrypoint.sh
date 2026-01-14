@@ -1,9 +1,6 @@
 #!/bin/sh
 set -eu
 
-# --- Hytale config default ---
-
-
 # --- Configuration defaults ---
 export SCRIPTS_PATH="/usr/local/bin/scripts"
 export SERVER_PORT="${SERVER_PORT:-5520}"
@@ -38,6 +35,22 @@ if [ "${PROD:-FALSE}" = "TRUE" ]; then
     sh "$SCRIPTS_PATH/checks/prod.sh"
 else
     printf "${DIM}Production audit skipped (PROD=FALSE)${NC}\n"
+fi
+
+# Check if the server is ARM64 if so then give a warning message.
+# 1. Check for ARM64 Architecture
+ARCH=$(uname -m)
+if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+    echo "############################################################"
+    echo "  WARNING: UNSUPPORTED ARCHITECTURE DETECTED"
+    echo "############################################################"
+    echo " Architecture: $ARCH"
+    echo ""
+    echo " Hytale-Downloader only works for x86_64 at the moment."
+    echo ""
+    echo " Status: Waiting for Hytale to release the native ARM64"
+    echo "         'hytale-downloader' binary. see the docs."
+    echo "############################################################"
 fi
 
 # --- 2. Initialization ---
