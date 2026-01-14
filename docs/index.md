@@ -16,7 +16,8 @@ To get the most performance out of your server, I suggest taking a look at the [
 
 ## ✨ Key Features
 
-* **⚡ Easy Deployment:** Get your server up and running in seconds using Docker or Docker Compose.
+* **🚀 Fast server startup:** Startup your server in 7 seconds with `CACHE=TRUE`
+* **⚡ Easy Deployment:** Go to the installation pages to get started
 * **🤖 Smart CLI:** Includes the `hytale-downloader` tool to manage server binaries and check for updates automatically. You can just use "hytale-downloader" in the terminal to accecs it.
 * **🍓 Multi-Arch Support:** Optimized for `x86_64` (`ARM64` coming soon [more info](https://x.com/slikey/status/2010869532454510999)).
 * **🛠️ Diagnostic Suite:** Built-in debug mode to audit your network and security settings automatically.
@@ -28,7 +29,7 @@ To get the most performance out of your server, I suggest taking a look at the [
 
 Ready to host your world? Follow our step-by-step guides to get started:
 
-1.  **[Requirements](./installation/requirements.md):** Check if you have your Hytale license key.
+1.  **[Requirements](./installation/requirements.md):** Hytale game license necessary.
 2.  **[System Requirements](./installation/system_requirements.md):** Check if your hardware is ready.
 3.  **[Container Installation](./installation/container_installation.md):** Deploy your first server using CLI or Compose.
 4.  **[Running the server](./installation/running_container.md):** Explenation how to run the setup and run the hytale server.
