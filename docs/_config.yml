@@ -3,12 +3,7 @@ title: Hytale Docker Server
 description: A lightweight Dockerized environment for Hytale servers.
 theme: jekyll-remote-theme
 
-favicon_ico: "/assets/website/favicon.ico"
-
-# Navigation
-header_pages:
-  - index.md
-  - installation.md
+favicon_ico: "../assets/website/favicon.ico"
 
 ga_tracking: G-L109Y1GVHR
 ga_tracking_anonymize_ip: true # Use GDPR compliant Google Analytics settings (true/nil by default)
