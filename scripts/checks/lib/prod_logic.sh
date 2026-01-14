@@ -57,7 +57,7 @@ check_system_resources() {
     log_step "File Descriptors"
     local fd_limit=$(ulimit -n)
     if [ "$fd_limit" -lt 4096 ]; then
-        log_warning "Low FD limit ($fd_limit)." "Hytale/Minecraft handle many concurrent files. Recommend 4096+."
+        log_warning "Low FD limit ($fd_limit)." "Hytale handle many concurrent files. Recommend 4096+."
     else
         log_success
     fi

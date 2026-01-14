@@ -25,16 +25,26 @@ The Hytale server container is highly configurable through environment variables
 | `TZ` | The [Timezone identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) for server logs. | `UTC` |
 | `DEBUG` | Set to `TRUE` to enable diagnostic scripts and verbose logging. | `FALSE` |
 | `SERVER_PORT` | The primary UDP port for game traffic. | `5520` |
-| `QUERY_PORT` | Port used for server list queries and heartbeats. | `25565` |
+| `SERVER_IP` | The IP address the server binds to. | `0.0.0.0` |
+| `PROD` | Set to `TRUE` to run production readiness audits. | `FALSE` |
 | `JAVA_OPTS` | Additional flags for the JVM (Expert use only). | `(Empty)` |
 
 ---
 
-## ⚙️ Hytale Settings
+## ⚙️ Hytale Settings (config.json)
+
+These variables directly inject values into the `home/container/config.json` file on startup.
 
 | Variable | Description | Default |
 | :--- | :--- | :--- |
-| `HYTALE` | - | - |
+| `HYTALE_SERVER_NAME` | The name displayed in the server browser. | `Hytale Server` |
+| `HYTALE_MOTD` | Message of the Day shown to players. | `(Empty)` |
+| `HYTALE_PASSWORD` | Set a password to make the server private. | `(Empty)` |
+| `HYTALE_MAX_PLAYERS` | Maximum number of concurrent players. | `100` |
+| `HYTALE_MAX_VIEW_RADIUS` | Maximum chunk distance sent to clients. | `32` |
+| `HYTALE_COMPRESSION` | Enable or disable local network compression. | `false` |
+| `HYTALE_WORLD` | The name of the world folder to load. | `default` |
+| `HYTALE_GAMEMODE` | The default game mode (e.g., Adventure, Creative). | `Adventure` |
 
 ---
 
@@ -45,3 +55,15 @@ To ensure your world, player data, and configurations are saved when the contain
 | Container Path | Purpose |
 | :--- | :--- |
 | `/home/container` | Main directory containing world files, logs, and configs. |
+
+## Folder structure
+
+The following folder structure is used:
+
+| Docker path | Purpose |
+| :--- | :--- |
+| `/usr/local/bin/scripts` | Location of automation and audit scripts |
+| `/opt/hytale` | Location of the hytale-downloader tool |
+| `/home/container` | Working directory of the docker container |
+| `/home/container/game` | Root directory for game assets and binaries |
+| `/home/container/game/server` | Specific location of the HytaleServer.jar |

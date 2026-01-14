@@ -38,15 +38,13 @@ ENV USER=container \
     HOME=/home/container \
     UID="1000" \
     GID="1000" \
-    MINECRAFT="" \
-    MINECRAFT_URL="" \
     PROD="" \
     DEBUG="" \
     EULA="" \
     JAVA_OPTS="" \
     SERVER_PORT="" \
     SERVER_IP="" \
-    EULA=FALSE MINECRAFT=FALSE PROD=FALSE DEBUG=FALSE
+    PROD=FALSE DEBUG=FALSE
 
 # 1. Consolidated dependencies and User creation
 # Using --no-cache and cleaning up after apk

@@ -10,13 +10,13 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 # --- Symbols ---
-# Using :- fallbacks even for internal symbols for ultimate safety
 SYM_OK="${GREEN}✔${NC}"
 SYM_FAIL="${RED}✘${NC}"
 SYM_WARN="${YELLOW}⚠${NC}"
 
 log_section() {
-    echo -e "\n${BOLD}${CYAN}SECTION:${NC} ${BOLD}${1:-}${NC}"
+    # %b allows backslash escapes in the arguments
+    printf "\n${BOLD}${CYAN}SECTION:${NC} ${BOLD}%s${NC}\n" "${1:-}"
 }
 
 log_step() {
@@ -24,21 +24,21 @@ log_step() {
 }
 
 log_success() {
-    echo -e "[ ${GREEN}OK${NC} ] ${SYM_OK}"
+    printf "[ ${GREEN}OK${NC} ] %b\n" "${SYM_OK}"
 }
 
 log_warning() {
-    echo -e "[ ${YELLOW}WARN${NC} ] ${SYM_WARN}"
-    echo -e "      ${YELLOW}↳ Note:${NC}  ${1:-}"
+    printf "[ ${YELLOW}WARN${NC} ] %b\n" "${SYM_WARN}"
+    printf "      ${YELLOW}↳ Note:${NC}  %s\n" "${1:-}"
     if [ -n "${2:-}" ]; then
-        echo -e "      ${DIM}↳ Suggestion: ${2}${NC}"
+        printf "      ${DIM}↳ Suggestion: %s${NC}\n" "${2}"
     fi
 }
 
 log_error() {
-    echo -e "[ ${RED}FAIL${NC} ] ${SYM_FAIL}"
-    echo -e "      ${RED}↳ Error:${NC} ${1:-}"
+    printf "[ ${RED}FAIL${NC} ] %b\n" "${SYM_FAIL}"
+    printf "      ${RED}↳ Error:${NC} %s\n" "${1:-}"
     if [ -n "${2:-}" ]; then
-        echo -e "      ${DIM}↳ Hint:   ${2}${NC}"
+        printf "      ${DIM}↳ Hint:   %s${NC}\n" "${2}"
     fi
 }

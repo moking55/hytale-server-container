@@ -20,3 +20,6 @@ The Docker image is built for 64-bit environments. 32-bit systems are not suppor
 ### 3. Software
 * **Docker Engine** (Linux) [CLI](https://docs.docker.com/engine/install/) or **Docker Desktop** (Windows, macOS or Linux) [GUI](https://docs.docker.com/desktop).
 * **Docker Compose** (Recommended for server installation).
+
+### 4. Other
+* Storage Requirement: Minimum 3.5GB free space required.

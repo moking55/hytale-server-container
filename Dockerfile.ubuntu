@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM eclipse-temurin:25.0.1_8-jre
+FROM eclipse-temurin:25-jre
 
 # Sets the user and home directory
 ENV USER=container
@@ -7,11 +7,11 @@ ENV HOME=/home/container
 
 # Runtime config
 ENV EULA="" DEBUG="" PROD="" SERVER_IP="" SERVER_PORT=5520 \
-    JAVA_OPTS="" MINECRAFT="" MINECRAFT_URL="" UID=1000 GID=1000
+    JAVA_OPTS="" UID=1000 GID=1000
 
 # 1. Install Dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    tini iproute2 dos2unix curl ca-certificates coreutils \
+    tini iproute2 dos2unix curl ca-certificates 7zip tzdata jq \
     && rm -rf /var/lib/apt/lists/*
 
 # 2. Add Gosu
@@ -20,17 +20,34 @@ RUN chmod +x /usr/local/bin/gosu
 
 # 3. Setup User (Handling the UID 1000 conflict correctly)
 RUN if getent passwd ${UID} > /dev/null 2>&1; then \
-        EXISTING_USER=$(getent passwd ${UID} | cut -d: -f1); \
-        usermod -l ${USER} -d ${HOME} -m ${EXISTING_USER}; \
-        groupmod -n ${USER} $(getent group ${GID} | cut -d: -f1) || true; \
+    EXISTING_USER=$(getent passwd ${UID} | cut -d: -f1); \
+    usermod -l ${USER} -d ${HOME} -m ${EXISTING_USER}; \
+    groupmod -n ${USER} $(getent group ${GID} | cut -d: -f1) || true; \
     else \
-        groupadd -g ${GID} ${USER} && \
-        useradd -m -d ${HOME} -u ${UID} -g ${USER} -s /bin/sh ${USER}; \
+    groupadd -g ${GID} ${USER} && \
+    useradd -m -d ${HOME} -u ${UID} -g ${USER} -s /bin/sh ${USER}; \
     fi
 
 WORKDIR ${HOME}
 
-# 4. Copy and fix scripts (Using a similar pattern to your Alpine builder)
+RUN echo "Starting Hytale download..." && \
+    curl -L -o /tmp/hytale-downloader.zip https://downloader.hytale.com/hytale-downloader.zip && \
+    echo "Download complete, extracting with 7zip..." && \
+    # -y: Assume 'yes' to all prompts
+    # -o: Specify output directory (Note: No space between -o and path)
+    7z x /tmp/hytale-downloader.zip -y -o/opt/hytale -mmt=on && \
+    echo "Extraction complete, cleaning up..." && \
+    rm /tmp/hytale-downloader.zip && \
+    rm -f /opt/hytale/hytale-downloader-windows-amd64.exe /opt/hytale/QUICKSTART.md && \
+    mv /opt/hytale/hytale-downloader-linux-amd64 /opt/hytale/hytale-downloader && \
+    # Set recursive permissions to 755 to ensure HytaleAssets are readable
+    echo "Applying permissions..." && \
+    chmod -R 755 /opt/hytale && \
+    # Create a symlink to the downloader in /usr/local/bin
+    ln -s /opt/hytale/hytale-downloader /usr/local/bin/hytale-downloader && \
+    echo "Hytale setup done."
+
+# 5. Copy and fix scripts
 COPY scripts/ /usr/local/bin/scripts/
 COPY entrypoint.sh /entrypoint.sh
 
@@ -40,21 +57,20 @@ RUN find /usr/local/bin/scripts -type f -name "*.sh" -exec dos2unix {} + && \
     chmod +x /entrypoint.sh && \
     chown -R ${USER}:${USER} ${HOME} /usr/local/bin/scripts /entrypoint.sh
 
-# 5. Build metadata
+# 6. Build metadata
 ARG BUILDTIME=local
 ARG VERSION=local
 ARG REVISION=local
 RUN echo "buildtime=${BUILDTIME}\nversion=${VERSION}\nrevision=${REVISION}" > /etc/image.properties
 
-# 6. Final Config
+# 7. Final Config
 USER ${USER}
-EXPOSE 5520/udp 5520/tcp
+EXPOSE 5520/udp
 STOPSIGNAL SIGTERM
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=2m --retries=3 \
     CMD ss -ulpn | grep -q ":${SERVER_PORT}" || exit 1
 
-# 7. EXECUTION (The missing part)
-# We use /usr/bin/tini for Ubuntu
+# 8. EXECUTION
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/bin/sh", "/entrypoint.sh"]

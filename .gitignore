@@ -74,6 +74,7 @@ examples/**/data/
 
 # Persistent runtime folders
 /data
+/data_backup
 
 # ----------------------
 # Archives and temp files

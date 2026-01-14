@@ -14,7 +14,6 @@ Run this command in your terminal to start the server immediately:
 docker run -d \
   --name hytale-server \
   --restart unless-stopped \
-  -e EULA="TRUE" \
   -e DEBUG="FALSE" \
   -p 5520:5520/udp \
   -v deinfreu-hytale-server-container:/home/container \
@@ -39,7 +38,6 @@ docker run -d \
         container_name: hytale-server
         restart: unless-stopped
         environment:
-        EULA: "TRUE"
         DEBUG: "FALSE"
         ports:
         - "5520:5520/udp"
