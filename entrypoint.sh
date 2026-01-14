@@ -51,9 +51,9 @@ log_success
 # --- 4. Execution ---
 printf "\n${BOLD}${CYAN}🚀 Launching Hytale Server...${NC}\n\n"
 
-# Execute the Java command. 
+# Execute the Java command.
 # Using exec ensures Java becomes PID 1, allowing it to receive shutdown signals properly.
-exec java -Xms128M -Xmx2048M \
+exec gosu $USER java -Xms128M -Xmx2048M \
 -Dterminal.jline=false \
 -Dterminal.ansi=true \
 -jar "$SERVER_JAR_PATH" \

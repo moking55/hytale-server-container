@@ -64,7 +64,7 @@ ARG REVISION=local
 RUN echo "buildtime=${BUILDTIME}\nversion=${VERSION}\nrevision=${REVISION}" > /etc/image.properties
 
 # 7. Final Config
-USER ${USER}
+USER root
 EXPOSE 5520/udp
 STOPSIGNAL SIGTERM
 

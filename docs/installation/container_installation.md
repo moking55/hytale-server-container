@@ -11,7 +11,7 @@ nav_order: 3
 Run this command in your terminal to start the server immediately:
 
 ```bash
-docker run -d \
+docker run \
   --name hytale-server \
   -e SERVER_IP="0.0.0.0" \
   -e SERVER_PORT="5520" \
@@ -20,6 +20,7 @@ docker run -d \
   -e TZ="Europe/Amsterdam" \
   -p 5520:5520/udp \
   -v "hytale-server:/home/container" \
+  -v "/etc/machine-id:/etc/machine-id:ro" \
   --restart unless-stopped \
   -t -i \
   deinfreu/hytale-server:experimental
@@ -38,22 +39,23 @@ docker run -d \
     add this docker-compose.yml information to the file:
     ``` yaml
     services:
-    hytale:
-        image: deinfreu/hytale-server:experimental
-        container_name: hytale-server
-        environment:
-            SERVER_IP: "0.0.0.0"
-            SERVER_PORT: "5520"
-            PROD: "FALSE"
-            DEBUG: "FALSE"
-            TZ: "Europe/Amsterdam"
-        restart: unless-stopped
-        ports:
-        - "5520:5520/udp"
-        volumes:
-        - ./data:/home/container
-        tty: true
-        stdin_open: true
+        hytale:
+            image: deinfreu/hytale-server:experimental
+            container_name: hytale-server
+            environment:
+                SERVER_IP: "0.0.0.0"
+                SERVER_PORT: "5520"
+                PROD: "FALSE"
+                DEBUG: "FALSE"
+                TZ: "Europe/Amsterdam"
+            restart: unless-stopped
+            ports:
+            - "5520:5520/udp"
+            volumes:
+            - ./data:/home/container
+            - /etc/machine-id:/etc/machine-id:ro
+            tty: true
+            stdin_open: true
     ```
 
 3. Now get out of the nano text editor and save the file:
