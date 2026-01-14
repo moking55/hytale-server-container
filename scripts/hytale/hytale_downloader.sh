@@ -62,6 +62,5 @@ if [ ! -f "$SERVER_JAR_PATH" ]; then
     fi
 else
     log_success
-    # Replaced echo -e with printf
     printf "      ${DIM}↳ Info:${NC} HytaleServer.jar exists. Skipping extraction.\n"
 fi

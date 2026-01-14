@@ -35,10 +35,15 @@ You can run the container by running this in your CLI
 ```bash
 docker run -d \
   --name hytale-server \
-  --restart unless-stopped \
-  -e EULA=TRUE \
+  -e SERVER_IP="0.0.0.0" \
+  -e SERVER_PORT="5520" \
+  -e PROD="FALSE" \
+  -e DEBUG="FALSE" \
+  -e TZ="Europe/Amsterdam" \
   -p 5520:5520/udp \
-  -v deinfreu-hytale-server-container:/home/container \
+  -v "./data:/home/container" \
+  --restart unless-stopped \
+  -t -i \
   deinfreu/hytale-server:experimental
 ```
 
@@ -50,12 +55,18 @@ services:
     image: deinfreu/hytale-server:experimental
     container_name: hytale-server
     environment:
-      - EULA=TRUE
+      SERVER_IP: "0.0.0.0"
+      SERVER_PORT: "5520"
+      PROD: "FALSE"
+      DEBUG: "FALSE"
+      TZ: "Europe/Amsterdam"
     restart: unless-stopped
     ports:
       - "5520:5520/udp"
     volumes:
       - ./data:/home/container
+    tty: true
+    stdin_open: true
 ```
 
 That's all you need to know to start! 🎉

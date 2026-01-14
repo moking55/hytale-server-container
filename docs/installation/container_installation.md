@@ -13,10 +13,15 @@ Run this command in your terminal to start the server immediately:
 ```bash
 docker run -d \
   --name hytale-server \
-  --restart unless-stopped \
+  -e SERVER_IP="0.0.0.0" \
+  -e SERVER_PORT="5520" \
+  -e PROD="FALSE" \
   -e DEBUG="FALSE" \
+  -e TZ="Europe/Amsterdam" \
   -p 5520:5520/udp \
-  -v hytale-server:/home/container \
+  -v "./data:/home/container" \
+  --restart unless-stopped \
+  -t -i \
   deinfreu/hytale-server:experimental
 ```
 
