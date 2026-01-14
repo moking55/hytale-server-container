@@ -1,31 +1,40 @@
+# --------------------------------------------------
+# SITEMAP LOCATION (Critical for Discovery)
+# --------------------------------------------------
+Sitemap: https://deinfreu.github.io/hytale-server-container/sitemap
+
+# --------------------------------------------------
+# ALLOW GOOGLE AND COMMON BOTS
+# --------------------------------------------------
 User-agent: *
 Allow: /
 
+# Specifically ensuring Googlebot has no hurdles
+User-agent: Googlebot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# AI and Search Bot Permissions
 User-agent: OAI-SearchBot
 Allow: /
 User-agent: GPTBot
 Allow: /
 User-agent: ChatGPT-User
 Allow: /
-
 User-agent: ClaudeBot
 Allow: /
 User-agent: Claude-SearchBot
 Allow: /
-
 User-agent: PerplexityBot
 Allow: /
 User-agent: Perplexity-User
 Allow: /
-
-User-agent: Google-Extended
-Allow: /
-
 User-agent: Applebot
 Allow: /
 User-agent: Applebot-Extended
 Allow: /
-
 User-agent: YouBot
 Allow: /
 User-agent: Bytespider
@@ -36,7 +45,6 @@ Allow: /
 # --------------------------------------------------
 # BLOCKING HARMFUL / AGGRESSIVE BOTS
 # --------------------------------------------------
-
 User-agent: AhrefsBot
 Disallow: /
 
@@ -64,5 +72,8 @@ Disallow: /
 User-agent: Sysomos
 Disallow: /
 
+# --------------------------------------------------
+# GLOBAL SETTINGS
+# --------------------------------------------------
 User-agent: *
 Crawl-delay: 10
