@@ -20,6 +20,15 @@ In youd docker compose mount this volume: "/etc/machine-id:/etc/machine-id:ro". 
 
 ---
 
+## I can't run the server on ARM64
+
+This happens because the 'hytale-downloader' cli tool does not yet support arm64
+
+### How to fix
+Currently waiting for hytale to release the ARM64 version for this tool. See the tweet [here](https://x.com/slikey/status/2010869532454510999)
+
+---
+
 ## 🕒 My logs don't show the correct date or time.
 
 By default, Docker containers often run in Coordinated Universal Time (UTC). To synchronize the server logs with your local time, you must define the `TZ` (Time Zone) environment variable.
