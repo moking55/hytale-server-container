@@ -67,7 +67,7 @@ cd "$BASE_DIR"
 log_success
 
 # Check if CACHE is set to true
-if [ "$CACHE" = "true" ]; then
+if [ "$CACHE" = "TRUE" ]; then
     AOT_FLAG="-XX:AOTCache=HytaleServer.aot"
 fi
 
