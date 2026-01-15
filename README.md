@@ -69,5 +69,49 @@ services:
       - /etc/machine-id:/etc/machine-id:ro
     tty: true
     stdin_open: true
+```
+
+## 🔧 Common Fixes & Troubleshooting
+
+If you encounter issues during deployment, check these common solutions below.
+
+### 1. Authentication Problems
+
+If the server requires authentication or you see authentication errors in the logs, follow these steps in your Linux console:
+
+1. Attach to the running container:
+```bash
+docker attach [container name]
+```
+
+
+2. Run the authentication command:
+```bash
+auth login device
+```
+
+
+3. An authentication link will appear. Copy the verification code, paste it into the Hytale OAuth website, and login with your Hytale account. Your server should now start successfully.
+
+### 2. Linux Permission Errors
+
+If the container crashes or logs errors regarding file access, it is likely a permission issue with your mounted volume.
+
+1. **Test with full permissions:** Try setting full permissions on the data directory to verify if this solves the issue.
+```bash
+chmod -R 777 [volume folder]
+```
+
+
+2. **Secure the permissions:** If the server runs successfully after step 1, revert to safer permissions to secure your server.
+```bash
+chmod -R 644 [volume folder]
+```
+
+
+3. **Directory navigation issues:** If setting permissions to `644` prevents folder navigation or access, you may need to use `755` for directories specifically.
+```bash
+chmod -R 755 [volume folder]
+```
 
 That's all you need to know to start! 🎉
