@@ -33,10 +33,13 @@ jobs:
         include:
           - os_type: ubuntu
             dockerfile: Dockerfile.ubuntu
+            tag_suffix: experimental
           - os_type: alpine
             dockerfile: Dockerfile.alpine
+            tag_suffix: experimental-alpine
           - os_type: alpine-liberica
             dockerfile: Dockerfile.alpine-liberica
+            tag_suffix: experimental-alpine-liberica
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -55,7 +58,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Extract version from tag
         id: get_version
-        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        run: |
+          raw_tag="${GITHUB_REF#refs/tags/}"
+          version="${raw_tag#v}"
+          echo "version=$version" >> $GITHUB_OUTPUT
       - name: Build & push to GitHub Container Registry
         uses: docker/build-push-action@v6
         with:
@@ -64,9 +70,9 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            ghcr.io/deinfreu/hytale-server:${{ steps.get_version.outputs.version }}
-          cache-from: type=gha,scope=${{ steps.get_version.outputs.version }}
-          cache-to: type=gha,mode=max,scope=${{ steps.get_version.outputs.version }}
+            ghcr.io/deinfreu/hytale-server:${{ matrix.tag_suffix }}-${{ steps.get_version.outputs.version }}
+          cache-from: type=gha,scope=${{ matrix.tag_suffix }}-${{ steps.get_version.outputs.version }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.tag_suffix }}-${{ steps.get_version.outputs.version }}
       - name: Build & push to Docker Hub
         uses: docker/build-push-action@v6
         with:
@@ -75,6 +81,6 @@ jobs:
           push: true
           platforms: linux/amd64
           tags: |
-            deinfreu/hytale-server:${{ steps.get_version.outputs.version }}
-          cache-from: type=gha,scope=${{ steps.get_version.outputs.version }}
-          cache-to: type=gha,mode=max,scope=${{ steps.get_version.outputs.version }}
+            deinfreu/hytale-server:${{ matrix.tag_suffix }}-${{ steps.get_version.outputs.version }}
+          cache-from: type=gha,scope=${{ matrix.tag_suffix }}-${{ steps.get_version.outputs.version }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.tag_suffix }}-${{ steps.get_version.outputs.version }}
