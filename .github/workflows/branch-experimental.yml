@@ -59,7 +59,7 @@ jobs:
           context: .
           file: ./Dockerfile.${{ matrix.os_type }}
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           tags: |
             ghcr.io/deinfreu/hytale-server:${{ matrix.tag_name }}
           cache-from: type=gha,scope=${{ matrix.tag_name }}
@@ -70,7 +70,7 @@ jobs:
           context: .
           file: ./Dockerfile.${{ matrix.os_type }}
           push: true
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           tags: |
             deinfreu/hytale-server:${{ matrix.tag_name }}
           cache-from: type=gha,scope=${{ matrix.tag_name }}
