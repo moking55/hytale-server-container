@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6mental
+        uses: actions/checkout@v6
 
       - name: Install Hadolint
         run: |
