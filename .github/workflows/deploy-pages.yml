@@ -59,6 +59,14 @@ jobs:
           echo ""
           echo "=== Checking if _site exists ==="
           [ -d "./_site" ] && echo "_site directory EXISTS" || echo "_site directory MISSING"
+          echo ""
+          echo "=== _site directory permissions ==="
+          ls -ld ./_site
+
+      - name: Fix _site permissions
+        run: |
+          sudo chown -R $(whoami):$(whoami) ./_site
+          sudo chmod -R u+w ./_site
           
       - name: Copy static web files
         run: |
