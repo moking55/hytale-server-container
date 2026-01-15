@@ -65,4 +65,9 @@ log_error() {
     if [ -n "${2:-}" ]; then
         printf "      ${DIM}↳ Hint:   %s${NC}\n" "${2}"
     fi
+    
+    # In DEBUG mode, don't exit - just log and continue
+    if [ "${DEBUG:-FALSE}" != "TRUE" ]; then
+        exit 1
+    fi
 }

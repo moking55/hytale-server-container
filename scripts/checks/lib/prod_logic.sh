@@ -30,7 +30,7 @@ check_java_mem() {
                 log_warning "No -Xmx limit detected." "Java may grow until Docker kills the container. Add -Xmx to JAVA_ARGS."
             elif [ "$xmx_mb" -gt "$limit_mb" ]; then
                 log_error "Heap ($xmx_mb MB) exceeds Docker limit ($limit_mb MB)!" "The container will OOM-kill immediately on load."
-                exit 1
+                # log_error will handle exit based on DEBUG mode
             else
                 log_success
                 echo -e "      ${DIM}↳ Java Heap: ${xmx_mb}MB | Container: ${limit_mb}MB${NC}"
@@ -69,7 +69,7 @@ check_filesystem() {
     log_step "Writable /tmp"
     if [ ! -w "/tmp" ]; then
         log_error "/tmp is not writable." "Java requires /tmp to extract native libraries."
-        exit 1
+        # log_error will handle exit based on DEBUG mode
     else
         log_success
     fi

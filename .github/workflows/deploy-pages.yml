@@ -32,14 +32,6 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      - name: 🔍 Debug - List files BEFORE build
-        run: |
-          echo "=== Files in assets/website ==="
-          ls -laR assets/website/
-          echo ""
-          echo "=== Files in docs ==="
-          ls -laR docs/
-
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:

@@ -21,7 +21,7 @@ validate_port_cfg() {
     if ! echo "$port" | grep -Eq '^[0-9]+$' || [ "$port" -lt 1 ] || [ "$port" -gt 65535 ]; then
         log_error "Invalid port: $port" \
         "SERVER_PORT must be a number between 1 and 65535."
-        exit 1
+        # log_error will handle exit based on DEBUG mode
     else
         log_success
     fi
@@ -35,7 +35,7 @@ check_port_availability() {
     if ss -ulpn | grep -q ":$port "; then
         log_error "Port $port is ALREADY in use!" \
         "Another process is using this port. Change SERVER_PORT or stop the conflicting container."
-        exit 1
+        # log_error will handle exit based on DEBUG mode
     else
         log_success
     fi

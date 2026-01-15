@@ -44,7 +44,7 @@ check_container_hardening() {
     log_step "Non-Root Enforcement"
     if [ "$(id -u)" = "0" ]; then
         log_error "Running as ROOT!" "Game servers should never run as root. Set 'user: 1000:1000' in Docker Compose."
-        exit 1
+        # log_error will handle exit based on DEBUG mode
     else
         log_success
     fi
@@ -55,18 +55,33 @@ check_clock_sync() {
     
     # Extract date from header safely
     local http_date
-    http_date=$(curl -sI --connect-timeout 3 https://google.com | grep -i '^date:' | cut -d' ' -f2-7 || echo "")
+    http_date=$(curl -sI --connect-timeout 3 https://google.com | grep -i '^date:' | cut -d' ' -f2- || echo "")
     
     if [ -n "$http_date" ]; then
         local container_now network_now diff abs_diff
-        container_now=$(date +%s)
-        network_now=$(date -d "$http_date" +%s)
+        
+        # Ensure we're comparing UTC times
+        container_now=$(TZ=UTC date +%s)
+        
+        # BusyBox date doesn't support -d flag, try GNU date first, fallback to BusyBox format
+        if network_now=$(TZ=UTC date -d "$http_date" +%s 2>/dev/null); then
+            # GNU date succeeded
+            :
+        elif network_now=$(TZ=UTC date -D "%a, %d %b %Y %H:%M:%S" -d "$http_date" +%s 2>/dev/null); then
+            # BusyBox date with explicit format
+            :
+        else
+            # Fallback: skip the check if parsing fails
+            log_warning "Time check skipped." "Could not parse network time format."
+            return
+        fi
+        
         diff=$((container_now - network_now))
         abs_diff=${diff#-} # Absolute value
         
         if [ "$abs_diff" -gt 60 ]; then
             log_error "Clock drift detected!" "Container is off by ${abs_diff}s. This causes SSL and Auth failures."
-            exit 1
+            # log_error will handle exit based on DEBUG mode
         else
             log_success
             echo -e "      ${DIM}↳ Drift: ${abs_diff}s (within acceptable limits)${NC}"
