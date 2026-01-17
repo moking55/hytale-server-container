@@ -17,20 +17,20 @@ export GID="${GID:-1000}"
 export NO_COLOR="${NO_COLOR:-FALSE}"
 
 # --- Hytale specific environment variables ---
-export HYTALE_ACCEPT_EARLY_PLUGINS="${HYTALE_ACCEPT_EARLY_PLUGINS:-FALSE}"
 export HYTALE_ALLOW_OP="${HYTALE_ALLOW_OP:-FALSE}"
-export HYTALE_AUTH_MODE="${HYTALE_AUTH_MODE:-FALSE}"
+export HYTALE_AUTH_MODE="${HYTALE_AUTH_MODE:-}"
 export HYTALE_BACKUP="${HYTALE_BACKUP:-FALSE}"
 export HYTALE_BACKUP_FREQUENCY="${HYTALE_BACKUP_FREQUENCY:-}"
+export HYTALE_BACKUP_DIR="${HYTALE_BACKUP_DIR:-}"
 
 # Initialize flags as empty strings
+# JVM flags (before -jar)
 export HYTALE_CACHE_FLAG=""
-export HYTALE_ACCEPT_EARLY_PLUGINS_FLAG=""
-export HYTALE_ALLOW_OP_FLAG=""
-export HYTALE_AUTH_MODE_FLAG=""
-export HYTALE_BACKUP_FLAG=""
-export HYTALE_BACKUP_FREQUENCY_FLAG=""
 export HYTALE_QUIET_FLAGS=""
+# CLI arguments (after -jar)
+export HYTALE_AUTH_MODE_ARG=""
+export HYTALE_ALLOW_OP_ARG=""
+export HYTALE_BACKUP_ARG=""
 
 # Load utilities
 . "$SCRIPTS_PATH/utils.sh"
@@ -93,16 +93,15 @@ else
 fi
 
 # Execute Java server as non-root user
+# JVM flags go before -jar, CLI arguments go after
 exec $RUNTIME java $JAVA_ARGS \
     -Dterminal.jline=false \
     -Dterminal.ansi=true \
     $HYTALE_CACHE_FLAG \
-    $HYTALE_ACCEPT_EARLY_PLUGINS_FLAG \
-    $HYTALE_ALLOW_OP_FLAG \
-    $HYTALE_AUTH_MODE_FLAG \
-    $HYTALE_BACKUP_FLAG \
-    $HYTALE_BACKUP_FREQUENCY_FLAG \
     $HYTALE_QUIET_FLAGS \
     -jar "$SERVER_JAR_PATH" \
     --assets "$GAME_DIR/Assets.zip" \
-    --bind "$SERVER_IP:$SERVER_PORT"
+    --bind "$SERVER_IP:$SERVER_PORT" \
+    $HYTALE_AUTH_MODE_ARG \
+    $HYTALE_ALLOW_OP_ARG \
+    $HYTALE_BACKUP_ARG
